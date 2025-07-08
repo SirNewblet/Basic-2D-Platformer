@@ -1,0 +1,7 @@
+Texture TexPlayerStand images/PlayerStand.png
+Texture TexPlayerJump images/PlayerJump.png
+Texture TexGround images/Ground.png
+Animation PlayerStand TexPlayerStand 4 4
+Animation PlayerJump TexPlayerJump 8 2
+Animation Ground TexGround 1 0
+Font Sooky fonts/sooky.ttf
