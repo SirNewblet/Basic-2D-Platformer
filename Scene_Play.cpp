@@ -49,7 +49,7 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity
 
 	float x = 0.0f, y = 0.0f;
 	x = (gridX * m_gridSize.x) + (entity->getComponent<CAnimation>().animation.getSize().x / 2);
-	y = (gridY * m_gridSize.y) + m_game->window().getSize().y - (entity->getComponent<CAnimation>().animation.getSize().y / 2);
+	y = m_game->window().getSize().y - (gridY * m_gridSize.y) - (entity->getComponent<CAnimation>().animation.getSize().y / 2);
 
 	return Vec2(x, y);
 }
