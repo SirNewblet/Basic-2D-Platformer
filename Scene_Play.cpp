@@ -71,7 +71,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 	while (fin >> item)
 	{
-		if (item == "Tile")
+		if (item == "Tile" || item == "Decoration")
 		{
 			
 			int tileGX = 0, tileGY = 0;
@@ -79,14 +79,14 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 			fin >> name >> tileGX >> tileGY;
 
-			auto brick = m_entityManager.addEntity("tile");
-			brick->addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
-			brick->addComponent<CTransform>(gridToMidPixel(tileGX, tileGY, brick));
-			brick->addComponent<CBoundingBox>(Vec2(brick->getComponent<CAnimation>().animation.getSize().x, brick->getComponent<CAnimation>().animation.getSize().y));
-		}
-		else if (item == "Decoration")
-		{
-			
+			auto tile = m_entityManager.addEntity("tile");
+			tile->addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
+			tile->addComponent<CTransform>(gridToMidPixel(tileGX, tileGY, tile));
+			if (item == "Tile")
+			{
+				// Decorations should not have a bounding box
+				tile->addComponent<CBoundingBox>(Vec2(tile->getComponent<CAnimation>().animation.getSize().x, tile->getComponent<CAnimation>().animation.getSize().y));
+			}
 		}
 		else if (item == "Player")
 		{
@@ -98,36 +98,12 @@ void Scene_Play::loadLevel(const std::string& filename)
 				>> m_playerConfig.speedX
 				>> m_playerConfig.speedY
 				>> m_playerConfig.maxSpeed
-				>> m_playerConfig.jumpSpeed
 				>> m_playerConfig.gravity
 				>> m_playerConfig.WEAPON;
 		}
 	}
 
 	spawnPlayer();
-
-
-	//if (brick->getComponent<CAnimation>().animation.getName() == "Brick")
-	//{
-	//	std::cout << "This could be a good way of identifying if a tile is a brick!\n";
-	//}
-
-	//if (brick->hasComponent<CAnimation>())
-	//{
-	//	// do whatever here if the brick has a CAnimation component
-	//	// can do something like:
-	//	brick->removeComponent<CAnimation>();
-	//}
-
-	//auto block = m_entityManager.addEntity("tile");
-	//block->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
-	//block->addComponent<CTransform>(Vec2(224, 480));
-	//// Add a bounding box, this will now show up if we press the "C" key
-	//block->addComponent<CBoundingBox>(m_game->assets().getAnimation("PlayerStand").getSize());
-
-	//auto question = m_entityManager.addEntity("tile");
-	//question->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
-	//question->addComponent<CTransform>(Vec2(352, 480));
 
 	// NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
 	//		Components are now returned as references rather than pointers. If you
@@ -148,21 +124,16 @@ void Scene_Play::spawnPlayer()
 	// Here is a sample player entity which you can use to construct other entities
 	m_player = m_entityManager.addEntity("player");
 	m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
-	m_player->addComponent<CTransform>(Vec2(100, 100));
-	m_player->addComponent<CBoundingBox>(Vec2(m_player->getComponent<CAnimation>().animation.getSize().x, m_player->getComponent<CAnimation>().animation.getSize().y));
-	m_player->addComponent<CGravity>(0.2);
-
+	m_player->addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
+	m_player->addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
+	m_player->addComponent<CGravity>(m_playerConfig.gravity);
+	//m_player->addComponent<CState>("STAND");
 	// TODO: Be sure to add the remaining components to the player
 }
 
 void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
 {
 	// TODO: This should spawn a bullet at the given entity, going in the direction the entity is facing
-}
-
-std::shared_ptr<Entity> Scene_Play::player()
-{
-	return nullptr;
 }
 
 void Scene_Play::update()
@@ -183,21 +154,23 @@ void Scene_Play::sMovement()
 {
 	Vec2 playerVelocity(0, m_player->getComponent<CTransform>().velocity.y);
 
+	// Record the position of the last frame as prevPos before we overwrite pos as prevPos is used in physics/collision
+	m_player->getComponent<CTransform>().prevPos = m_player->getComponent<CTransform>().pos;
+
 	if (m_player->getComponent<CInput>().right || m_player->getComponent<CInput>().left)
 	{
-		playerVelocity.x = m_player->getComponent<CInput>().right ? 5 : -5;
+		m_player->getComponent<CTransform>().pos.x += m_player->getComponent<CInput>().right ? m_player->getComponent<CTransform>().velocity.x : -m_player->getComponent<CTransform>().velocity.x;
 		m_player->getComponent<CTransform>().scale.x = m_player->getComponent<CInput>().right ? 1 : -1;
 		//m_player->getComponent<CState>().state = "run";
 	}
 
-	if (m_player->getComponent<CInput>().canJump && m_player->getComponent<CInput>().up)
+	if (m_player->getComponent<CInput>().canJump && m_player->getComponent<CInput>().up && m_player->getComponent<CState>().state != "AIR")
 	{
 		//m_player->getComponent<CState>().state = "jump";
 		m_player->getComponent<CInput>().canJump = false;
-		playerVelocity.y = -10;
+		m_player->getComponent<CTransform>().pos.y += m_player->getComponent<CTransform>().velocity.y - m_player->getComponent<CGravity>().gravity;
 	}
 
-	m_player->getComponent<CTransform>().velocity = playerVelocity;
 
 	for (auto e : m_entityManager.getEntities())
 	{
@@ -240,28 +213,26 @@ void Scene_Play::sCamera()
 
 void Scene_Play::sStatus()
 {
-	// We should not modify state outside of this function
-	// We should check health here instead
-	if (m_player->getComponent<CState>().state != "dead")
+	if (m_player->getComponent<CState>().state == "RUN")
 	{
-		if ((m_player->getComponent<CInput>().left || m_player->getComponent<CInput>().right) && !m_player->getComponent<CInput>().up)
-		{
-			m_player->getComponent<CState>().state = "run";
-		}
-		if (m_player->getComponent<CTransform>().velocity.x == 0)
-		{
-			m_player->getComponent<CState>().state = "stand";
-		}
-		if (m_player->getComponent<CTransform>().velocity.y != 0)
-		{
-			m_player->getComponent<CState>().state = "jump";
-		}
+		m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
+		//m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
 	}
-	else
+	if (m_player->getComponent<CState>().state == "AIR")
 	{
-		// Player has died
-		// m_player->getComponent<CState>().state = "dead";
-		// Call function "lifelost" here or something to handle when player HP <= 0
+		m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
+	}
+	if (m_player->getComponent<CState>().state == "JUMP")
+	{
+		m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
+	}
+	if (m_player->getComponent<CState>().state == "STILL")
+	{
+		m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerStand");
+	}
+	if (m_player->getComponent<CState>().state == "FALL")
+	{
+		m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
 	}
 }
 
@@ -283,6 +254,19 @@ void Scene_Play::sCollision()
 	//			- used by the Animation system
 	// TODO: Check to see if the player has fallen down a hole (y > height())
 	// TODO: Don't let the player walk off the left side of the map
+
+	// Player collision with entities
+	for (auto& e : m_entityManager.getEntities())
+	{
+		Vec2 overlap = Physics::GetOverlap(e, m_player);
+		if (overlap.x > 0 && overlap.y > 0)
+		{
+			// Collision detected
+
+			
+		}
+	}
+	
 }
 
 void Scene_Play::sDoAction(const Action& action)
@@ -323,24 +307,6 @@ void Scene_Play::sAnimation()
 	{
 		if (e->hasComponent<CAnimation>())
 		{
-			if (e->getComponent<CState>().state == "run")
-			{
-				e->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
-			}
-			if (e->getComponent<CState>().state == "jump")
-			{
-				e->removeComponent<CAnimation>();
-				e->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
-			}
-			if (e->getComponent<CState>().state == "stand")
-			{
-				e->removeComponent<CAnimation>();
-				e->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
-			}
-			if (!e->getComponent<CAnimation>().repeat)
-			{
-				// Call destroy on entity here since it's animation has finished
-			}
 			e->getComponent<CAnimation>().animation.update();
 		}
 	}
