@@ -1,4 +1,0 @@
-Tilesheet Player images/PlayerStand.png TexPlayerStand
-Animation PlayerStand			TexPlayerStand			1 0
-Texture PlayerStand images/PlayerStand.png
-Font Sooky fonts/sooky.ttf
