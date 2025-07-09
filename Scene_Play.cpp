@@ -174,6 +174,7 @@ void Scene_Play::sMovement()
 
 	for (auto e : m_entityManager.getEntities())
 	{
+		//testing pr change
 		if (e->hasComponent<CGravity>())
 		{
 			e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
