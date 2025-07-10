@@ -127,10 +127,6 @@ void GameEngine::sUserInput()
 				// Look up the action and send the action to the scene
 				currentScene()->doAction(Action(currentScene()->getActionMap().at(event->getIf<sf::Event::KeyReleased>()->code), actionType));
 			}
-			else
-			{
-
-			}
 		}
 	}
 }
