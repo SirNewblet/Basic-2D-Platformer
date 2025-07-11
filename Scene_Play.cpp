@@ -140,9 +140,8 @@ void Scene_Play::update()
 	m_entityManager.update();
 
 	// TODO: Implement pause functionality
-	
+	//sLifespan();
 	sMovement();
-	sLifespan();
 	sCollision();
 	sStatus();
 	sAnimation();
@@ -217,48 +216,57 @@ void Scene_Play::sStatus()
 
 void Scene_Play::sMovement()
 {
+	if (m_pIsOnGround && !m_player->getComponent<CInput>().up)
+	{
+		m_player->getComponent<CInput>().canJump = true;
+	}
+
 	for (auto e : m_entityManager.getEntities())
 	{
-		// Before we do anything, copy the entities position to it's prevPos
+		// Before we do anything, make a copy of the entity's position
 		e->getComponent<CTransform>().prevPos = e->getComponent<CTransform>().pos;
 
-		if (e->tag() == "Player")
+		if (e->hasComponent<CGravity>())
 		{
-			// SET PLAYER X-VELOCITY (this portion is working fine - shouldn't need to be touched)
-			if (e->getComponent<CInput>().right || e->getComponent<CInput>().left)
+			if (e->tag() == "Player")
 			{
-				e->getComponent<CTransform>().velocity.x = e->getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
-				e->getComponent<CTransform>().scale.x = e->getComponent<CInput>().right ? 1 : -1;
-			}
-			else if (!e->getComponent<CInput>().right && !e->getComponent<CInput>().left)
-			{
-				e->getComponent<CTransform>().velocity.x = 0.0f;
-			}
+				// SET PLAYER X-VELOCITY
+				if (e->getComponent<CInput>().right || e->getComponent<CInput>().left)
+				{
+					e->getComponent<CTransform>().velocity.x = e->getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
+					e->getComponent<CTransform>().scale.x = e->getComponent<CInput>().right ? 1 : -1;
+				}
+				else if (!e->getComponent<CInput>().right && !e->getComponent<CInput>().left)
+				{
+					e->getComponent<CTransform>().velocity.x = 0.0f;
+				}
 
-			// SET PLAYER Y-VELOCITY
-			if (e->getComponent<CTransform>().velocity.y == 0 && e->getComponent<CInput>().up && e->getComponent<CInput>().canJump)
-			{
-				e->getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
-				e->getComponent<CInput>().canJump = false;
-			}
-			else if (!e->getComponent<CInput>().canJump && e->getComponent<CInput>().up)
-			{
-				e->getComponent<CTransform>().velocity.y += e->getComponent<CTransform>().velocity.y + e->getComponent<CGravity>().gravity;
-			}
-			else if (!e->getComponent<CInput>().canJump && !e->getComponent<CInput>().up)
-			{
-				e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+				// SET PLAYER Y-VELOCITY
+				if (e->getComponent<CInput>().up && e->getComponent<CInput>().canJump && m_pIsOnGround)
+				{
+					e->getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
+					e->getComponent<CInput>().canJump = false;
+					m_pIsOnGround = false;
+				}
+				else if (!e->getComponent<CInput>().canJump && !m_pIsOnGround && e->getComponent<CInput>().up)
+				{
+					e->getComponent<CTransform>().velocity.y += e->getComponent<CTransform>().velocity.y + e->getComponent<CGravity>().gravity;
+				}
+				else if (!e->getComponent<CInput>().canJump && !m_pIsOnGround && !e->getComponent<CInput>().up)
+				{
+					e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+				}
+				else
+				{
+					e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+				}
+
+				e->getComponent<CGravity>().gravity *= 1.1;
 			}
 			else
 			{
-				//e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+				e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
 			}
-
-			e->getComponent<CGravity>().gravity *= 1.20;
-		}
-		else
-		{
-			e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
 		}
 
 		// Cap entities speed in all directions using player's max speed
@@ -279,6 +287,8 @@ void Scene_Play::sMovement()
 			e->getComponent<CTransform>().velocity.y = -m_playerConfig.maxSpeed;
 		}
 
+
+		// Velocity has been managed, now update entity position using the updated volocity
 		e->getComponent<CTransform>().pos += e->getComponent<CTransform>().velocity;
 	}
 }
@@ -295,63 +305,66 @@ void Scene_Play::sCollision()
 	//			- used by the Animation system
 
 	// Player collision with tiles
+	Vec2 overlap(0, 0);
+	auto& pPos = m_player->getComponent<CTransform>();
+
 	for (auto& e : m_entityManager.getEntities("Tile"))
 	{
-		Vec2 overlap = Physics::GetOverlap(e, m_player);
-		auto& pPos = m_player->getComponent<CTransform>().pos;
+		overlap = Physics::GetOverlap(e, m_player);
+
+		// Collision detected
 		if (overlap.x > 0 && overlap.y > 0)
 		{
-			// First, resolve Y-Collision since most times player will be on a tile walking around
-			if (pPos.y < e->getComponent<CTransform>().pos.y && m_player->getComponent<CTransform>().velocity.y > 0)
+			if (overlap.x > overlap.y)
 			{
-				// Player coming from above with a positive y value (moving downwards on the screen)
-				// Bottom of player is hitting the top of some entity
-				pPos.y = e->getComponent<CTransform>().pos.y - e->getComponent<CBoundingBox>().halfSize.y - m_player->getComponent<CBoundingBox>().halfSize.y;
-				m_player->getComponent<CTransform>().velocity.y = 0.0f;
-				m_player->getComponent<CGravity>().gravity = m_playerConfig.gravity;
-				m_player->getComponent<CInput>().canJump = true;
-				m_player->getComponent<CState>().state = "STANDING";
+				// Vertical collision since the overlap of x is greater than the overlap of y
+				// Resolve y-direction since this is the primary overlap
+				if (pPos.pos.y > pPos.prevPos.y)
+				{
+					// Falling into a block
+					//pPos.pos.y = e->getComponent<CTransform>().pos.y - e->getComponent<CBoundingBox>().halfSize.y - m_player->getComponent<CBoundingBox>().halfSize.y;
+					pPos.pos.y -= overlap.y;
+					pPos.velocity.y = 0.0f;
+					m_player->getComponent<CGravity>().gravity = m_playerConfig.gravity;
+					m_pIsOnGround = true;
+				}
+				else
+				{
+					// Jumping into a block
+					//pPos.pos.y = e->getComponent<CTransform>().pos.y + e->getComponent<CBoundingBox>().halfSize.y + m_player->getComponent<CBoundingBox>().halfSize.y;
+					pPos.pos.y += overlap.y;
+					pPos.velocity.y = 0.0f;
+					m_pIsOnGround = false;
+				}
 			}
-			if (pPos.y > e->getComponent<CTransform>().pos.y && m_player->getComponent<CTransform>().velocity.y < 0)
-			{
-				// Player coming from below with a negative y value (moving upwards on the screen)
-				// Top of player is hitting the bottom of some entity
-				pPos.y = e->getComponent<CTransform>().pos.y + e->getComponent<CBoundingBox>().halfSize.y + m_player->getComponent<CBoundingBox>().halfSize.y;
-				m_player->getComponent<CTransform>().velocity.y = 0.05f;
-
-				// Call destroy on the tile
-			}
-
-			// Get new overlap now that Y-Collision has been resolved before trying to resolve X-Collision
 			overlap = Physics::GetOverlap(e, m_player);
 			if (overlap.x > 0 && overlap.y > 0)
 			{
-				if (pPos.x < e->getComponent<CTransform>().pos.x)
+				// Horizontal overlap since the overlap of y is greater than overlap of x
+				// Resolve x-direction since this is the primary overlap
+				if (pPos.pos.x > pPos.prevPos.x)
 				{
-					// Player coming from left with a positive x value (moving right on the screen)
-					// Right side of player is hitting the left of some entity
-					pPos.x = e->getComponent<CTransform>().pos.x - e->getComponent<CBoundingBox>().halfSize.x - m_player->getComponent<CBoundingBox>().halfSize.x;
-					m_player->getComponent<CTransform>().velocity.x = 0;
+					// Running to the right
+					pPos.pos.x -= overlap.x;
 				}
-				if (pPos.x > e->getComponent<CTransform>().pos.x)
+				else if (pPos.pos.x < pPos.prevPos.x)
 				{
-					// Player coming from right with a negative x value (moving left on the screen)
-					// Left side of player is hitting the right of some entity
-					pPos.x = e->getComponent<CTransform>().pos.x + e->getComponent<CBoundingBox>().halfSize.x + m_player->getComponent<CBoundingBox>().halfSize.x;
-					m_player->getComponent<CTransform>().velocity.x = 0;
+					// Running to the left
+					pPos.pos.x += overlap.x;
 				}
 			}
 		}
 	}
 
+	// Not using bounding box here since we want the player to completely exit the screen before we respawn them
 	if (m_player->getComponent<CTransform>().pos.y > m_game->window().getSize().y + m_player->getComponent<CAnimation>().animation.getSize().y)
 	{
 		m_player->getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player);
 	}
-
-	if (m_player->getComponent<CTransform>().pos.x < 0)
+	// Player can not walk off the left side of the screen
+	if (m_player->getComponent<CTransform>().pos.x - m_player->getComponent<CBoundingBox>().halfSize.x < 0)
 	{
-		m_player->getComponent<CTransform>().pos.x = 0;
+		m_player->getComponent<CTransform>().pos.x = m_player->getComponent<CBoundingBox>().halfSize.x;
 	}
 }
 
