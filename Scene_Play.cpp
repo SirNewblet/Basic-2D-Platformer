@@ -125,7 +125,7 @@ void Scene_Play::spawnPlayer()
 	m_player = m_entityManager.addEntity("Player");
 	m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
 	m_player->addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
-	m_player->getComponent<CState>().state = "AIR";
+	m_player->addComponent<CState>().state = "JUMPING";
 	m_player->addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
 	m_player->addComponent<CGravity>(m_playerConfig.gravity);
 }
@@ -144,7 +144,7 @@ void Scene_Play::update()
 	sMovement();
 	sLifespan();
 	sCollision();
-	//sStatus();
+	sStatus();
 	sAnimation();
 	sRender();
 }
@@ -161,32 +161,58 @@ void Scene_Play::sCamera()
 
 void Scene_Play::sStatus()
 {
+	// PLAYER STATES: Will need to conver this to an enum later
+	// - STANDING
+	// - JUMPING
+	// - RUNNING
+	// - SHOOTING
+	// - CROUCHING
+
+	// BULLET STATES:
+	// - LIVING
+	// - DYING // Dying takes time, set animation depending on frames for the animation, once the animation ends, sAnimation() calls destroy() on the entity
+
+	// BLOCK STATES:
+	// - LIVING
+	// - DYING // Dying takes time, set animation depending on frames for the animation, once the animation ends, sAnimation() calls destroy() on the entity
+
 	for (auto& e : m_entityManager.getEntities())
 	{
 		if (e->hasComponent<CState>())
 		{
-			if (e->getComponent<CState>().state == "AIR")
+			if (e->tag() == "Player")
 			{
-				m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
+				if (e->getComponent<CState>().state == "STANDING")
+				{
+					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerStand");
+					//m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
+					e->getComponent<CAnimation>().animation.update();
+				}
+				else if (e->getComponent<CState>().state == "JUMPING")
+				{
+					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
+					//m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
+					e->getComponent<CAnimation>().animation.update();
+				}
+				else if (e->getComponent<CState>().state == "RUNNING")
+				{
+					// TODO
+				}
+				else if (e->getComponent<CState>().state == "SHOOTING")
+				{
+					// TODO
+				}
+				else if (e->getComponent<CState>().state == "CROUCHING")
+				{
+					// TODO
+				}
 			}
-			else if (e->getComponent<CState>().state == "STILL")
+			else
 			{
-				m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerStand");
+				// TODO
 			}
 		}
 	}
-	//if (m_player->getComponent<CState>().state == "JUMP")
-	//{
-	//	m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
-	//}
-	//if (m_player->getComponent<CState>().state == "STILL")
-	//{
-	//	m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerStand");
-	//}
-	//if (m_player->getComponent<CState>().state == "FALL")
-	//{
-	//	m_player->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
-	//}
 }
 
 void Scene_Play::sMovement()
@@ -196,49 +222,43 @@ void Scene_Play::sMovement()
 		// Before we do anything, copy the entities position to it's prevPos
 		e->getComponent<CTransform>().prevPos = e->getComponent<CTransform>().pos;
 
-		// not all entities will have a gravity component
-		// First, set the velocity component for X, Y
-		// This will be used to modify the entities position
-		if (e->hasComponent<CGravity>())
-		{
-			e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
-		}
-
 		if (e->tag() == "Player")
 		{
-			// SET PLAYER X-VELOCITY
+			// SET PLAYER X-VELOCITY (this portion is working fine - shouldn't need to be touched)
 			if (e->getComponent<CInput>().right || e->getComponent<CInput>().left)
 			{
 				e->getComponent<CTransform>().velocity.x = e->getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
 				e->getComponent<CTransform>().scale.x = e->getComponent<CInput>().right ? 1 : -1;
-				//e->getComponent<CState>().state = "RUN";
 			}
 			else if (!e->getComponent<CInput>().right && !e->getComponent<CInput>().left)
 			{
 				e->getComponent<CTransform>().velocity.x = 0.0f;
-				//e->getComponent<CState>().state = "STILL";
 			}
 
 			// SET PLAYER Y-VELOCITY
-			if (e->getComponent<CInput>().canJump && e->getComponent<CInput>().up && e->getComponent<CState>().state != "AIR")
+			if (e->getComponent<CTransform>().velocity.y == 0 && e->getComponent<CInput>().up && e->getComponent<CInput>().canJump)
 			{
 				e->getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
-				e->getComponent<CState>().state = "AIR";
 				e->getComponent<CInput>().canJump = false;
 			}
-			else if (!e->getComponent<CInput>().canJump && e->getComponent<CInput>().up && e->getComponent<CState>().state == "AIR")
+			else if (!e->getComponent<CInput>().canJump && e->getComponent<CInput>().up)
 			{
 				e->getComponent<CTransform>().velocity.y += e->getComponent<CTransform>().velocity.y + e->getComponent<CGravity>().gravity;
 			}
-			else if (!e->getComponent<CInput>().canJump && !e->getComponent<CInput>().up && e->getComponent<CState>().state == "AIR")
+			else if (!e->getComponent<CInput>().canJump && !e->getComponent<CInput>().up)
 			{
 				e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
 			}
 			else
 			{
-				e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+				//e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
 			}
-			e->getComponent<CGravity>().gravity *= 1.1;
+
+			e->getComponent<CGravity>().gravity *= 1.20;
+		}
+		else
+		{
+			e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
 		}
 
 		// Cap entities speed in all directions using player's max speed
@@ -261,21 +281,12 @@ void Scene_Play::sMovement()
 
 		e->getComponent<CTransform>().pos += e->getComponent<CTransform>().velocity;
 	}
-
-	// TODO: Implement player movement / jumping based on its CInput component
-	// TODO: Implement gravity's effect on the player
 }
 
 void Scene_Play::sCollision()
 {
-	// REMEMBER: SFML's (0,0) position is on the TOP-LEFT corner
-	//					This means jumping will have a negative y-component
-	//					and gravity will have a positive y-component
-	//					Also, something BELOW something else will have a y value GREATER than it
-	//					Also, something ABOVE something else will have a y value LESS than it
-
 	// TODO: Implement Physics::GetOverlap() function, use it inside this function
-	
+
 	// TODO: Implement bullt / tile collisions
 	//			- Destroy the tile if it has a Brick animation
 	// TODO: Implement player / tile collisions
@@ -297,18 +308,18 @@ void Scene_Play::sCollision()
 				// Bottom of player is hitting the top of some entity
 				pPos.y = e->getComponent<CTransform>().pos.y - e->getComponent<CBoundingBox>().halfSize.y - m_player->getComponent<CBoundingBox>().halfSize.y;
 				m_player->getComponent<CTransform>().velocity.y = 0.0f;
-				m_player->getComponent<CState>().state = "STILL";
-				m_player->getComponent<CInput>().canJump = true;
 				m_player->getComponent<CGravity>().gravity = m_playerConfig.gravity;
+				m_player->getComponent<CInput>().canJump = true;
+				m_player->getComponent<CState>().state = "STANDING";
 			}
 			if (pPos.y > e->getComponent<CTransform>().pos.y && m_player->getComponent<CTransform>().velocity.y < 0)
 			{
 				// Player coming from below with a negative y value (moving upwards on the screen)
 				// Top of player is hitting the bottom of some entity
 				pPos.y = e->getComponent<CTransform>().pos.y + e->getComponent<CBoundingBox>().halfSize.y + m_player->getComponent<CBoundingBox>().halfSize.y;
-				m_player->getComponent<CTransform>().velocity.y = 0.0f;
-				m_player->getComponent<CState>().state = "AIR";
-				m_player->getComponent<CInput>().canJump = false;
+				m_player->getComponent<CTransform>().velocity.y = 0.05f;
+
+				// Call destroy on the tile
 			}
 
 			// Get new overlap now that Y-Collision has been resolved before trying to resolve X-Collision
@@ -354,7 +365,11 @@ void Scene_Play::sDoAction(const Action& action)
 		if (action.name() == "TOGGLE_GRID")			{ m_drawGrid = !m_drawGrid; }
 		if (action.name() == "PAUSE")				{ setPaused(!m_paused); }
 		if (action.name() == "QUIT")				{ onEnd(); }
-		if (action.name() == "JUMP")				{ m_player->getComponent<CInput>().up = true; }
+		if (action.name() == "JUMP") 
+		{
+			m_player->getComponent<CInput>().up = true;
+			//m_player->getComponent<CInput>().canJump = false;
+		}
 		if (action.name() == "CROUCH")				{ m_player->getComponent<CInput>().down = true; }
 		if (action.name() == "LEFT")				{ m_player->getComponent<CInput>().left = true; }
 		if (action.name() == "RIGHT")				{ m_player->getComponent<CInput>().right = true; }
@@ -363,9 +378,10 @@ void Scene_Play::sDoAction(const Action& action)
 	}
 	else if (action.type() == "END")
 	{
-		if (action.name() == "JUMP") {
+		if (action.name() == "JUMP") 
+		{
 			m_player->getComponent<CInput>().up = false;
-			m_player->getComponent<CInput>().canJump = true;
+			//m_player->getComponent<CInput>().canJump = true;
 		}
 		if (action.name() == "CROUCH")				{ m_player->getComponent<CInput>().down = false; }
 		if (action.name() == "LEFT")				{ m_player->getComponent<CInput>().left = false; }
@@ -385,20 +401,6 @@ void Scene_Play::sAnimation()
 	{
 		if (e->hasComponent<CAnimation>())
 		{
-			//if (e->tag() == "Player")
-			//{
-			//	if (e->getComponent<CState>().state == "AIR")
-			//	{
-			//		//e->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
-			//		e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
-			//	}
-			//	if (e->getComponent<CState>().state == "STILL")
-			//	{
-			//		//e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerStand");
-			//		e->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
-			//	}
-			//}
-
 			e->getComponent<CAnimation>().animation.update();
 		}
 	}

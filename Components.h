@@ -83,7 +83,7 @@ public:
 class CState : public Component
 {
 public:
-	std::string state = "jumping";
+	std::string state = "";
 	CState() {};
 	CState(const std::string& s) : state(s) {}
 };
