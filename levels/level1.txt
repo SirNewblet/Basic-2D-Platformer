@@ -42,7 +42,7 @@ Tile Ground 39 0
 Tile Ground 39 1
 Tile Ground 39 2
 Tile Ground 39 3
-Player 2 6 48 48 5 -20 20 0.75 GUN
+Player 2 6 48 48 10 -20 20 0.75 GUN
 
 
 
