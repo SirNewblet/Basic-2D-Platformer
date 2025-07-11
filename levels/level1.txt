@@ -10,6 +10,7 @@ Tile Ground 8 0
 Tile Ground 9 0
 Tile Ground 10 0
 Tile Ground 11 0
+Decoration NonEnemyTree 11 1
 Tile Ground 12 0
 Tile Ground 13 0
 Tile Ground 13 4
@@ -42,7 +43,7 @@ Tile Ground 39 0
 Tile Ground 39 1
 Tile Ground 39 2
 Tile Ground 39 3
-Player 2 6 48 48 10 -20 20 0.75 GUN
+Player 2 6 48 48 8 -10 15 2.0 GUN
 
 
 

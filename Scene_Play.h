@@ -20,6 +20,7 @@ protected:
 	std::string							m_levelPath;
 	std::string							m_lastAction;
 	PlayerConfig						m_playerConfig;
+	bool								m_pIsOnGround = false;
 	bool								m_drawTextures = true;
 	bool								m_drawCollision = false;
 	bool								m_drawGrid = false;
@@ -34,7 +35,6 @@ protected:
 	void update();
 	void spawnPlayer();
 	void spawnBullet(std::shared_ptr<Entity> entity);
-	std::shared_ptr<Entity> player();
 	void sDoAction(const Action& action);
 
 	void sMovement();
