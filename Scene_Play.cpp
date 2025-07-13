@@ -25,10 +25,10 @@ void Scene_Play::init(const std::string& levelPath)
 	registerAction(sf::Keyboard::Key::G,			"TOGGLE_GRID");					// Toggle drawing (G)rid
 
 	registerAction(sf::Keyboard::Key::Space,		"JUMP");
+	registerAction(sf::Keyboard::Key::Enter,		"SHOOT");
 	registerAction(sf::Keyboard::Key::A,			"LEFT");
 	registerAction(sf::Keyboard::Key::D,			"RIGHT");
 	registerAction(sf::Keyboard::Key::S,			"CROUCH");
-	//registerAction((sf::Keyboard::Key)sf::Mouse::Button::Left,		"SHOOT");
 	//registerAction((sf::Keyboard::Key)sf::Mouse::Button::Right,		"SPECIAL");
 	// TODO: Register all other gameplay Actions
 
@@ -91,6 +91,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 			{
 				// Decorations should not have a bounding box
 				tile->addComponent<CBoundingBox>(Vec2(tile->getComponent<CAnimation>().animation.getSize().x, tile->getComponent<CAnimation>().animation.getSize().y));
+				tile->addComponent<CState>("ALIVE");
 			}
 		}
 		else if (item == "Player")
@@ -129,9 +130,6 @@ void Scene_Play::spawnPlayer()
 	// Here is a sample player entity which you can use to construct other entities
 	m_player = m_entityManager.addEntity("Player");
 	m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
-	//m_player->addComponent<CTransform>();
-	//m_player->getComponent<CTransform>().scale = { 2.0, 2.0 };
-	//m_player->getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player);
 	m_player->addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
 	m_player->addComponent<CState>().state = "JUMPING";
 	m_player->addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
@@ -141,6 +139,14 @@ void Scene_Play::spawnPlayer()
 void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
 {
 	// TODO: This should spawn a bullet at the given entity, going in the direction the entity is facing
+	auto bullet = m_entityManager.addEntity("Bullet");
+	bullet->addComponent<CTransform>(Vec2(entity->getComponent<CTransform>().pos.x, entity->getComponent<CTransform>().pos.y));
+	bullet->getComponent<CTransform>().scale = entity->getComponent<CTransform>().scale;
+	bullet->getComponent<CTransform>().velocity.x = bullet->getComponent<CTransform>().scale.x * 15;
+	bullet->addComponent<CAnimation>(m_game->assets().getAnimation("BulletAlive"), true);
+	bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize() * 0.90f);
+	bullet->addComponent<CState>("ALIVE");
+	bullet->addComponent<CLifespan>(600, m_currentFrame);
 }
 
 void Scene_Play::update()
@@ -148,17 +154,29 @@ void Scene_Play::update()
 	m_entityManager.update();
 
 	// TODO: Implement pause functionality
-	//sLifespan();
+	sLifespan();
 	sMovement();
 	sCollision();
 	sStatus();
 	sAnimation();
 	sRender();
+
+	m_currentFrame++;
 }
 
 void Scene_Play::sLifespan()
 {
 	// TODO: Check lifespan of entities that have them, and destroy them if they go over
+	for (auto& e : m_entityManager.getEntities())
+	{
+		if (e->hasComponent<CLifespan>())
+		{
+			if (m_currentFrame - e->getComponent<CLifespan>().frameCreated > e->getComponent<CLifespan>().lifespan)
+			{
+				e->destroy();
+			}
+		}
+	}
 }
 
 void Scene_Play::sCamera()
@@ -197,7 +215,7 @@ void Scene_Play::sStatus()
 				{
 					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
 				}
-				else if (e->getComponent<CState>().state == "RUNNING")
+				else if (e->getComponent<CState>().state == "RUNNING" && e->getComponent<CAnimation>().animation.getName() != "PlayerRun")
 				{
 					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerRun");
 				}
@@ -210,9 +228,23 @@ void Scene_Play::sStatus()
 					// TODO
 				}
 			}
-			else
+			else if (e->tag() == "Bullet")
 			{
 				// TODO
+				if (e->getComponent<CState>().state == "DEAD" && e->getComponent<CAnimation>().animation.getName() != "BulletDead")
+				{
+					e->getComponent<CTransform>().velocity = Vec2(0, 0);
+					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
+					e->getComponent<CAnimation>().repeat = false;
+				}
+			}
+			else if (e->tag() == "Tile")
+			{
+				if (e->getComponent<CState>().state == "DEAD" && e->getComponent<CAnimation>().animation.getName() != "GroundDead")
+				{
+					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("GroundDead");
+					e->getComponent<CAnimation>().repeat = false;
+				}
 			}
 		}
 	}
@@ -223,6 +255,12 @@ void Scene_Play::sMovement()
 	if (m_pIsOnGround && !m_player->getComponent<CInput>().up)
 	{
 		m_player->getComponent<CInput>().canJump = true;
+	}
+
+	if (m_player->getComponent<CInput>().shoot && m_player->getComponent<CInput>().canShoot)
+	{
+		spawnBullet(m_player);
+		m_player->getComponent<CInput>().canShoot = false;
 	}
 
 	for (auto e : m_entityManager.getEntities())
@@ -324,7 +362,6 @@ void Scene_Play::sCollision()
 	for (auto& e : m_entityManager.getEntities("Tile"))
 	{
 		overlap = Physics::GetOverlap(e, m_player);
-
 		// Collision detected
 		if (overlap.x > 0 && overlap.y > 0)
 		{
@@ -335,7 +372,6 @@ void Scene_Play::sCollision()
 				if (pPos.pos.y > pPos.prevPos.y)
 				{
 					// Falling into a block
-					//pPos.pos.y = e->getComponent<CTransform>().pos.y - e->getComponent<CBoundingBox>().halfSize.y - m_player->getComponent<CBoundingBox>().halfSize.y;
 					pPos.pos.y -= overlap.y;
 					pPos.velocity.y = 0.0f;
 					m_player->getComponent<CGravity>().gravity = m_playerConfig.gravity;
@@ -344,7 +380,6 @@ void Scene_Play::sCollision()
 				else
 				{
 					// Jumping into a block
-					//pPos.pos.y = e->getComponent<CTransform>().pos.y + e->getComponent<CBoundingBox>().halfSize.y + m_player->getComponent<CBoundingBox>().halfSize.y;
 					pPos.pos.y += overlap.y;
 					pPos.velocity.y = 0.0f;
 					m_pIsOnGround = false;
@@ -365,6 +400,16 @@ void Scene_Play::sCollision()
 					// Running to the left
 					pPos.pos.x += overlap.x;
 				}
+			}
+		}
+
+		for (auto& b : m_entityManager.getEntities("Bullet"))
+		{
+			overlap = Physics::GetOverlap(e, b);
+			if (overlap.x > 0 && overlap.y > 0)
+			{
+				b->getComponent<CState>().state = "DEAD";
+				e->getComponent<CState>().state = "DEAD";
 			}
 		}
 	}
@@ -391,11 +436,7 @@ void Scene_Play::sDoAction(const Action& action)
 		if (action.name() == "TOGGLE_GRID")			{ m_drawGrid = !m_drawGrid; }
 		if (action.name() == "PAUSE")				{ setPaused(!m_paused); }
 		if (action.name() == "QUIT")				{ onEnd(); }
-		if (action.name() == "JUMP") 
-		{
-			m_player->getComponent<CInput>().up = true;
-			//m_player->getComponent<CInput>().canJump = false;
-		}
+		if (action.name() == "JUMP")				{m_player->getComponent<CInput>().up = true; }
 		if (action.name() == "CROUCH")				{ m_player->getComponent<CInput>().down = true; }
 		if (action.name() == "LEFT")				{ m_player->getComponent<CInput>().left = true; }
 		if (action.name() == "RIGHT")				{ m_player->getComponent<CInput>().right = true; }
@@ -404,21 +445,20 @@ void Scene_Play::sDoAction(const Action& action)
 	}
 	else if (action.type() == "END")
 	{
-		if (action.name() == "JUMP") 
-		{
-			m_player->getComponent<CInput>().up = false;
-			//m_player->getComponent<CInput>().canJump = true;
-		}
+		if (action.name() == "JUMP")				{ m_player->getComponent<CInput>().up = false; }
 		if (action.name() == "CROUCH")				{ m_player->getComponent<CInput>().down = false; }
 		if (action.name() == "LEFT")				{ m_player->getComponent<CInput>().left = false; }
 		if (action.name() == "RIGHT")				{ m_player->getComponent<CInput>().right = false; }
+		if (action.name() == "SHOOT") 
+		{
+			m_player->getComponent<CInput>().canShoot = true;
+			m_player->getComponent<CInput>().shoot = false;
+		}
 	}
 }
 
 void Scene_Play::sAnimation()
 {
-	// TODO: Complete the Animation class code first
-
 	// TODO: set the animation of the player based on its CState component
 	// TODO: For each entity with an animation, call entity->getComponent<CAnimation>().animation.update()
 	//			if the animation is not repeated, and it has ended, destroy that entity
@@ -427,7 +467,21 @@ void Scene_Play::sAnimation()
 	{
 		if (e->hasComponent<CAnimation>())
 		{
-			e->getComponent<CAnimation>().animation.update();
+			if (e->getComponent<CAnimation>().repeat)
+			{
+				e->getComponent<CAnimation>().animation.update();
+			}
+			else
+			{
+				if (e->getComponent<CAnimation>().animation.hasEnded())
+				{
+					e->destroy();
+				}
+				else
+				{
+					e->getComponent<CAnimation>().animation.update();
+				}
+			}
 		}
 	}
 }
@@ -510,6 +564,8 @@ void Scene_Play::sRender()
 			}
 		}
 	}
+
+	m_currentFrame++;
 }
 
 void Scene_Play::onEnd()
