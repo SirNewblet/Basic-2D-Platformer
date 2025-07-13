@@ -1,9 +1,11 @@
-Texture TexPlayerStand images/PlayerStand.png
+Texture TexPlayerIdle images/PlayerIdle.png
 Texture TexPlayerJump images/PlayerJump.png
+Texture TexPlayerRun images/PlayerRun.png
 Texture TexGround images/Ground.png
 Texture TexNonEnemyTree images/NonEnemyTree.png
-Animation PlayerStand TexPlayerStand 4 4
+Animation PlayerIdle TexPlayerIdle 4 4
 Animation PlayerJump TexPlayerJump 8 2
+Animation PlayerRun TexPlayerRun 4 4
 Animation NonEnemyTree TexNonEnemyTree 4 8
 Animation Ground TexGround 1 0
 Font Sooky fonts/sooky.ttf

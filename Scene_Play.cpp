@@ -49,7 +49,7 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity
 
 	float x = 0.0f, y = 0.0f;
 	x = (gridX * m_gridSize.x) + (entity->getComponent<CAnimation>().animation.getSize().x / 2);
-	y = m_game->window().getSize().y - (gridY * m_gridSize.y) - (entity->getComponent<CAnimation>().animation.getSize().y / 2);
+	y = m_game->window().getSize().y - (gridY * m_gridSize.y) - (entity->getComponent<CAnimation>().animation.getSize().y / 2 * entity->getComponent<CTransform>().scale.y);
 
 	return Vec2(x, y);
 }
@@ -81,7 +81,12 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 			auto tile = m_entityManager.addEntity("Tile");
 			tile->addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
-			tile->addComponent<CTransform>(gridToMidPixel(tileGX, tileGY, tile));
+			tile->addComponent<CTransform>();
+			if (item == "Decoration")
+			{
+				tile->getComponent<CTransform>().scale = { 5.0, 7.0 };
+			}
+			tile->getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, tile);
 			if (item == "Tile")
 			{
 				// Decorations should not have a bounding box
@@ -124,6 +129,9 @@ void Scene_Play::spawnPlayer()
 	// Here is a sample player entity which you can use to construct other entities
 	m_player = m_entityManager.addEntity("Player");
 	m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
+	//m_player->addComponent<CTransform>();
+	//m_player->getComponent<CTransform>().scale = { 2.0, 2.0 };
+	//m_player->getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player);
 	m_player->addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
 	m_player->addComponent<CState>().state = "JUMPING";
 	m_player->addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
@@ -181,21 +189,17 @@ void Scene_Play::sStatus()
 		{
 			if (e->tag() == "Player")
 			{
-				if (e->getComponent<CState>().state == "STANDING")
+				if (e->getComponent<CState>().state == "IDLE" && e->getComponent<CAnimation>().animation.getName() != "PlayerIdle")
 				{
-					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerStand");
-					//m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
-					e->getComponent<CAnimation>().animation.update();
+					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerIdle");
 				}
-				else if (e->getComponent<CState>().state == "JUMPING")
+				else if (e->getComponent<CState>().state == "JUMPING" && e->getComponent<CAnimation>().animation.getName() != "PlayerJump")
 				{
 					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
-					//m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
-					e->getComponent<CAnimation>().animation.update();
 				}
 				else if (e->getComponent<CState>().state == "RUNNING")
 				{
-					// TODO
+					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerRun");
 				}
 				else if (e->getComponent<CState>().state == "SHOOTING")
 				{
@@ -235,16 +239,25 @@ void Scene_Play::sMovement()
 				{
 					e->getComponent<CTransform>().velocity.x = e->getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
 					e->getComponent<CTransform>().scale.x = e->getComponent<CInput>().right ? 1 : -1;
+					if (m_pIsOnGround)
+					{
+						e->getComponent<CState>().state = "RUNNING";
+					}
 				}
 				else if (!e->getComponent<CInput>().right && !e->getComponent<CInput>().left)
 				{
 					e->getComponent<CTransform>().velocity.x = 0.0f;
+					if (m_pIsOnGround)
+					{
+						e->getComponent<CState>().state = "IDLE";
+					}
 				}
 
 				// SET PLAYER Y-VELOCITY
 				if (e->getComponent<CInput>().up && e->getComponent<CInput>().canJump && m_pIsOnGround)
 				{
 					e->getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
+					e->getComponent<CState>().state = "JUMPING";
 					e->getComponent<CInput>().canJump = false;
 					m_pIsOnGround = false;
 				}
@@ -422,8 +435,8 @@ void Scene_Play::sAnimation()
 void Scene_Play::sRender()
 {
 	// Color the background darker so you know that the game is paused
-	if (!m_paused) { m_game->window().clear(sf::Color(100, 100, 255)); }
-	else { m_game->window().clear(sf::Color(50, 50, 150)); }
+	if (!m_paused) { m_game->window().clear(sf::Color(0xa83e75)); }
+	else { m_game->window().clear(sf::Color(0xa83ea8)); }
 
 	// Set the viewport of the window to be centered on the player if it's far enough right
 	auto& pPos = m_player->getComponent<CTransform>().pos;
