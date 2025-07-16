@@ -24,6 +24,7 @@ protected:
 	void init();
 	void update();
 	void onEnd();
+	void sAnimation();
 	void sDoAction(const Action& action);
 
 public:

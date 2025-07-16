@@ -174,6 +174,7 @@ void GameEngine::update()
 
 	// Render system is separated from the scene update so the game engine can
 	// simulate a specified number of frames without rendering each frame of simulation
+	//currentScene()->sRender();
 	currentScene()->sRender();
 	m_window.display();
 }
