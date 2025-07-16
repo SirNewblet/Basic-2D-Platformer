@@ -46,13 +46,6 @@ bool Scene::hasEnded() const
 
 void Scene::drawLine(const Vec2& p1, const Vec2& p2)
 {
-	//sf::Vertex line[] =
-	//{
-	//	sf::Vertex(sf::Vector2f(p1.x, p1.y)),
-	//	sf::Vertex(sf::Vector2f(p2.x, p2.y))
-	//};
-
-
 	sf::Vertex line[] =
 	{
 		{{p1.x, p1.y}},
