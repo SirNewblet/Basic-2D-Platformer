@@ -30,7 +30,6 @@ void Scene_Play::init(const std::string& levelPath)
 	registerAction(sf::Keyboard::Key::D,			"RIGHT");
 	registerAction(sf::Keyboard::Key::S,			"CROUCH");
 	//registerAction((sf::Keyboard::Key)sf::Mouse::Button::Right,		"SPECIAL");
-	// TODO: Register all other gameplay Actions
 
 	m_gridText.setCharacterSize(24);
 
@@ -40,8 +39,7 @@ void Scene_Play::init(const std::string& levelPath)
 // IMPORTANT: Always add the CAnimation component first so that gridToMidPixel can compute correctly
 Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity)
 {
-	// PRIORITIZE THIS FUNCTION EARLY
-	// TODO: This function takes in a grid (x, y) position and an Entity
+	//			This function takes in a grid (x, y) position and an Entity
 	//			Return a Vec2 indicating where the CENTER position of the Entity should be
 	//			You must use the Entity's Animation size to position it correctly
 	//			The size of the grid width and height is stored in m_gridSize.x and m_gridSize.y
@@ -58,13 +56,6 @@ void Scene_Play::loadLevel(const std::string& filename)
 {
 	// Reset the entity manager every time we load a level
 	m_entityManager = EntityManager();
-
-	// TODO: read in the level file and add the appropriate entities
-	//			use the PlayerConfig struct m_playerConfig to store player properties
-	//			this struct is defined at the top of Scene_Play.h
-
-
-	// NOTE: All of the code below is sample code which shows you how to set up and use entities with the new syntax, it should be removed
 
 	std::ifstream fin(filename);
 	std::string item = "";
@@ -110,8 +101,8 @@ void Scene_Play::loadLevel(const std::string& filename)
 	}
 
 	spawnPlayer();
-
-	// NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
+	//      NOTE:
+	//------  THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE  ----------
 	//		Components are now returned as references rather than pointers. If you
 	//		do not specify a reference variable type, it will COPY the component
 	//		Here is an example:
@@ -166,7 +157,6 @@ void Scene_Play::update()
 
 void Scene_Play::sLifespan()
 {
-	// TODO: Check lifespan of entities that have them, and destroy them if they go over
 	for (auto& e : m_entityManager.getEntities())
 	{
 		if (e->hasComponent<CLifespan>())
@@ -230,7 +220,6 @@ void Scene_Play::sStatus()
 			}
 			else if (e->tag() == "Bullet")
 			{
-				// TODO
 				if (e->getComponent<CState>().state == "DEAD" && e->getComponent<CAnimation>().animation.getName() != "BulletDead")
 				{
 					e->getComponent<CTransform>().velocity = Vec2(0, 0);
@@ -320,7 +309,7 @@ void Scene_Play::sMovement()
 			}
 		}
 
-		// Cap entities speed in all directions using player's max speed
+		// Cap entities speed in all directions using player's max speed (ideally entities should have their own max speed)
 		if (e->getComponent<CTransform>().velocity.x > m_playerConfig.maxSpeed)
 		{
 			e->getComponent<CTransform>().velocity.x = m_playerConfig.maxSpeed;
@@ -346,15 +335,6 @@ void Scene_Play::sMovement()
 
 void Scene_Play::sCollision()
 {
-	// TODO: Implement Physics::GetOverlap() function, use it inside this function
-
-	// TODO: Implement bullt / tile collisions
-	//			- Destroy the tile if it has a Brick animation
-	// TODO: Implement player / tile collisions
-	//			- Update the CState component of the player to store whether
-	//			- it is currently on the ground or in the air. This will be 
-	//			- used by the Animation system
-
 	// Player collision with tiles
 	Vec2 overlap(0, 0);
 	auto& pPos = m_player->getComponent<CTransform>();
@@ -459,10 +439,6 @@ void Scene_Play::sDoAction(const Action& action)
 
 void Scene_Play::sAnimation()
 {
-	// TODO: set the animation of the player based on its CState component
-	// TODO: For each entity with an animation, call entity->getComponent<CAnimation>().animation.update()
-	//			if the animation is not repeated, and it has ended, destroy that entity
-
 	for (auto& e : m_entityManager.getEntities())
 	{
 		if (e->hasComponent<CAnimation>())
