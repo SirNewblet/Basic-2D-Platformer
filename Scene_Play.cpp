@@ -8,6 +8,16 @@
 #include <iostream>
 #include <fstream>
 
+bool isInside(Vec2 pos, std::shared_ptr<Entity> e)
+{
+	auto ePos = e->getComponent<CTransform>().pos;
+	auto size = e->getComponent<CAnimation>().animation.getSize();
+	float dx = fabs(pos.x - ePos.x);
+	float dy = fabs(pos.y - ePos.y);
+
+	return ((dx <= size.x / 2) && (dy <= size.y / 2));
+}
+
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath) :
 	Scene(gameEngine),
 	m_levelPath(levelPath),
@@ -52,6 +62,16 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity
 	return Vec2(x, y);
 }
 
+Vec2 Scene_Play::windowToWorld(const Vec2& windowPos) const
+{
+	auto view = m_game->window().getView();
+
+	float wx = view.getCenter().x - (m_game->window().getSize().x / 2);
+	float wy = view.getCenter().y - (m_game->window().getSize().y / 2);
+
+	return Vec2(windowPos.x + wx, windowPos.y + wy);
+}
+
 void Scene_Play::loadLevel(const std::string& filename)
 {
 	// Reset the entity manager every time we load a level
@@ -73,6 +93,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 			auto tile = m_entityManager.addEntity("Tile");
 			tile->addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			tile->addComponent<CTransform>();
+			tile->addComponent<CDraggable>();
 			if (item == "Decoration")
 			{
 				tile->getComponent<CTransform>().scale = { 5.0, 7.0 };
@@ -145,6 +166,7 @@ void Scene_Play::update()
 	m_entityManager.update();
 
 	// TODO: Implement pause functionality
+	sDragAndDrop();
 	sLifespan();
 	sMovement();
 	sCollision();
@@ -153,6 +175,17 @@ void Scene_Play::update()
 	sRender();
 
 	m_currentFrame++;
+}
+
+void Scene_Play::sDragAndDrop()
+{
+	for (auto e : m_entityManager.getEntities())
+	{
+		if (e->hasComponent<CDraggable>() && e->getComponent<CDraggable>().dragging)
+		{
+			e->getComponent<CTransform>().pos = windowToWorld(m_mPos);
+		}
+	}
 }
 
 void Scene_Play::sLifespan()
@@ -422,6 +455,24 @@ void Scene_Play::sDoAction(const Action& action)
 		if (action.name() == "RIGHT")				{ m_player->getComponent<CInput>().right = true; }
 		if (action.name() == "SHOOT")				{ m_player->getComponent<CInput>().shoot = true; }
 		if (action.name() == "SPECIAL")				{ m_player->getComponent<CInput>().special = true; }
+		if (action.name() == "LEFT_CLICK")			
+		{ 
+			Vec2 worldPos = windowToWorld(action.pos());
+			//std::cout << "Mouse clicked at: " << worldPos.x << ", " << worldPos.y << std::endl;
+			for (auto& e : m_entityManager.getEntities())
+			{
+				if (e->hasComponent<CDraggable>() && isInside(worldPos, e))
+				{
+					std::cout << "CLICKED ON ENTITY: " << e->getComponent<CAnimation>().animation.getName() << std::endl;
+					e->getComponent<CDraggable>().dragging = !e->getComponent<CDraggable>().dragging;
+				}
+			}
+		}
+		if (action.name() == "MOUSE_MOVE")
+		{ 
+			m_mPos = action.pos();
+			m_mouseShape.setPosition({ m_mPos.x, m_mPos.y });
+		}
 	}
 	else if (action.type() == "END")
 	{
@@ -540,13 +591,17 @@ void Scene_Play::sRender()
 			}
 		}
 	}
-
+	m_mouseShape.setFillColor(sf::Color(255, 0, 0));
+	m_mouseShape.setRadius(4);
+	m_mouseShape.setOrigin({ 2, 2 });
+	Vec2 worldPos = windowToWorld(m_mPos);
+	m_mouseShape.setPosition({ worldPos.x, worldPos.y });
+	m_game->window().draw(m_mouseShape);
 	m_currentFrame++;
 }
 
 void Scene_Play::onEnd()
 {
-	// TODO: When the scene ends, change back to the MENU scene
-	//			use m_game->changeScene(correct params);
-	//m_game->changeScene("Menu", SceneMap, true);
+	m_hasEnded = true;
+	m_game->changeScene("MENU", nullptr, true);
 }

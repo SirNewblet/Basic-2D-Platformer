@@ -33,7 +33,7 @@ void EntityManager::removeDeadEntities(EntityVec& vec)
 	auto ne = std::remove_if(vec.begin(), vec.end(),
 		[](auto e)
 		{
-			std::cout << "Removing dead entity: " << e->id() << "\n";
+			//std::cout << "Removing dead entity: " << e->id() << "\n";
 			return !e->isActive();
 		});
 

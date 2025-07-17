@@ -7,7 +7,7 @@
 
 class EntityManager;
 
-typedef std::tuple<CTransform, CLifespan, CInput, CBoundingBox, CAnimation, CGravity, CState> ComponentTuple;
+typedef std::tuple<CTransform, CLifespan, CInput, CBoundingBox, CAnimation, CGravity, CState, CDraggable> ComponentTuple;
 
 class Entity
 {

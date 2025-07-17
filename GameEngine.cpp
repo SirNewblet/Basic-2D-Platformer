@@ -128,6 +128,62 @@ void GameEngine::sUserInput()
 				currentScene()->doAction(Action(currentScene()->getActionMap().at(event->getIf<sf::Event::KeyReleased>()->code), actionType));
 			}
 		}
+
+		if (event->is<sf::Event::MouseButtonPressed>() || event->is<sf::Event::MouseButtonReleased>())
+		{
+			auto mousePos = sf::Mouse::getPosition(m_window);
+			Vec2 mpos(mousePos.x, mousePos.y);
+			if (event->getIf<sf::Event::MouseButtonPressed>())
+			{
+				switch (event->getIf<sf::Event::MouseButtonPressed>()->button)
+				{
+				case sf::Mouse::Button::Left:
+				{
+					currentScene()->doAction(Action("LEFT_CLICK", "START", mpos));
+					break;
+				}
+				case sf::Mouse::Button::Middle:
+				{
+					currentScene()->doAction(Action("MIDDLE_CLICK", "START", mpos));
+					break;
+				}
+				case sf::Mouse::Button::Right:
+				{
+					currentScene()->doAction(Action("RIGHT_CLICK", "START", mpos));
+					break;
+				}
+				default: break;
+				}
+			}
+			else
+			{
+				switch (event->getIf<sf::Event::MouseButtonReleased>()->button)
+				{
+				case sf::Mouse::Button::Left:
+				{
+					currentScene()->doAction(Action("LEFT_CLICK", "STOP", mpos));
+					break;
+				}
+				case sf::Mouse::Button::Middle:
+				{
+					currentScene()->doAction(Action("MIDDLE_CLICK", "STOP", mpos));
+					break;
+				}
+				case sf::Mouse::Button::Right:
+				{
+					currentScene()->doAction(Action("RIGHT_CLICK", "STOP", mpos));
+					break;
+				}
+				default: break;
+				}
+			}
+		}
+		
+		auto mouseMov = event->getIf<sf::Event::MouseMoved>();
+		if (mouseMov)
+		{
+			currentScene()->doAction(Action("MOUSE_MOVE", "START", Vec2(mouseMov->position.x, mouseMov->position.y)));
+		}
 	}
 }
 
