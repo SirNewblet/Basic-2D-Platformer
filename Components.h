@@ -8,6 +8,13 @@ public:
 	bool has = false;
 };
 
+class CDraggable : public Component
+{
+public:
+	bool dragging = false;
+	CDraggable() {}
+};
+
 class CTransform : public Component
 {
 public:
