@@ -155,6 +155,7 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="MemoryMapping.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="Profiler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Scene_Menu.h" />
     <ClInclude Include="Scene_Play.h" />

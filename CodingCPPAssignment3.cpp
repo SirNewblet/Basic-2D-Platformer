@@ -4,8 +4,11 @@
 #include <SFML/Graphics.hpp>
 #include "GameEngine.h"
 
+#include "Profiler.h"
+
 int main()
 {
+    PROFILE_FUNCTION();
     std::cout << "Booting up!\n";
     std::cout << "Passing assets to game engine now.\n";
     GameEngine g("assets/assets.txt");
