@@ -6,6 +6,7 @@
 #include <map>
 
 typedef std::vector<std::shared_ptr<Entity>> EntityVec;
+typedef std::tuple< std::vector<CTransform>, std::vector<CLifespan>, std::vector<CInput>, std::vector<CBoundingBox>, std::vector<CAnimation>, std::vector<CGravity>, std::vector<CState>, std::vector<CDraggable>> EntityComponentVecTuple;
 
 class EntityManager
 {
