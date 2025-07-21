@@ -7,7 +7,7 @@
 #include <string>
 #include <algorithm>
 
-#define PROFILING 1
+//#define PROFILING 1
 #ifdef PROFILING
 	#define PROFILE_SCOPE(name) \
 		ProfileTimer timer##__LINE__(name)
@@ -29,7 +29,7 @@ struct ProfileResult
 
 class Profiler
 {
-	std::string m_outputFile = "profilingResult.json";
+	std::string m_outputFile = "results.json";
 	size_t m_profileCount = 0;
 	std::ofstream m_outputStream;
 	std::mutex m_lock;
@@ -41,8 +41,7 @@ class Profiler
 	}
 
 	void writeHeader() { m_outputStream << "{\"otherData\": {}, \"traceEvents\": ["; }
-	void writeFooter() { m_outputStream << "]}";
-}
+	void writeFooter() { m_outputStream << "]}"; }
 
 public:
 	static Profiler& Instance()
@@ -60,17 +59,17 @@ public:
 	{
 		std::lock_guard<std::mutex> lock(m_lock);
 
-		if (m_profileCount++ > 0) { m_outputStream << ", "; }
+		if (m_profileCount++ > 0) { m_outputStream << ","; }
 
 		std::string name = result.name;
 		std::replace(name.begin(), name.end(), '"', '\'');
 		m_outputStream << "\n{";
 		m_outputStream << "\"cat\":\"function\",";
 		m_outputStream << "\"dur\":" << (result.end - result.start) << ',';
-		m_outputStream << "\"name\":\"" << name << "\", ";
+		m_outputStream << "\"name\":\"" << name << "\",";
 		m_outputStream << "\"ph\":\"X\",";
 		m_outputStream << "\"pid\":0, ";
-		m_outputStream << "\"tid\":" << result.threadID << ", ";
+		m_outputStream << "\"tid\":" << result.threadID << ",";
 		m_outputStream << "\"ts\":" << result.start;
 		m_outputStream << "}";
 	}
@@ -104,8 +103,7 @@ public:
 	{
 		static long long lastStartTime = 0;
 		m_startTimepoint = std::chrono::high_resolution_clock::now();
-		m_result.start = std::chrono::time_point_cast<std::chrono::microseconds>
-			(m_startTimepoint).time_since_epoch().count();
+		m_result.start = std::chrono::time_point_cast<std::chrono::microseconds>(m_startTimepoint).time_since_epoch().count();
 
 		m_result.start += (m_result.start == lastStartTime ? 1 : 0);
 		lastStartTime = m_result.start;

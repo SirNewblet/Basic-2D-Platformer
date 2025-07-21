@@ -8,7 +8,7 @@
 
 int main()
 {
-    PROFILE_FUNCTION();
+    //PROFILE_FUNCTION();
     std::cout << "Booting up!\n";
     std::cout << "Passing assets to game engine now.\n";
     GameEngine g("assets/assets.txt");
