@@ -18,8 +18,10 @@ Tile Ground 14 0
 Tile Ground 15 0
 Tile Ground 16 0
 Tile Ground 17 0
+Enemy EnemyRunner 17 1 10
 Tile Ground 18 0
 Tile Ground 19 0
+Enemy EnemyRunner 19 1 10
 Tile Ground 20 0
 Tile Ground 21 0
 Tile Ground 22 0
@@ -28,6 +30,7 @@ Tile Ground 24 0
 Tile Ground 25 0
 Tile Ground 26 0
 Tile Ground 27 0
+Enemy EnemyRunner 27 1 10
 Tile Ground 28 0
 Tile Ground 29 0
 Tile Ground 30 0

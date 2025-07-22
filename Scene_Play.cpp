@@ -106,6 +106,20 @@ void Scene_Play::loadLevel(const std::string& filename)
 				tile->addComponent<CState>("ALIVE");
 			}
 		}
+		else if (item == "Enemy")
+		{
+			int tileGX = 0, tileGY = 0, damage = 0;
+			std::string name;
+
+			fin >> name >> tileGX >> tileGY >> damage;
+
+			auto enemy = m_entityManager.addEntity("Enemy");
+			enemy->addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
+			enemy->addComponent<CTransform>();
+			enemy->getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
+			enemy->addComponent<CBoundingBox>(Vec2(enemy->getComponent<CAnimation>().animation.getSize().x * 0.85f, enemy->getComponent<CAnimation>().animation.getSize().y * 0.85f));
+			enemy->addComponent<CState>("ALIVE");
+		}
 		else if (item == "Player")
 		{
 			fin

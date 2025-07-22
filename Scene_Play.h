@@ -14,6 +14,11 @@ class Scene_Play : public Scene
 		std::string WEAPON;
 	};
 
+	struct EnemyConfig
+	{
+		float gridX = 0, gridY = 0, collisionX = 0, collisionY = 0, speedX = 0, speedY = 0, maxSpeed = 0, gravity = 0, damage = 0;
+	};
+
 protected:
 
 	std::shared_ptr<Entity>				m_player;
