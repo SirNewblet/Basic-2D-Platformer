@@ -42,7 +42,7 @@ void GameEngine::init(const std::string& path)
 		}
 	}
 
-	m_window.create(sf::VideoMode({ wWidth, wHeight }), "Definitely NOT Mario");
+	m_window.create(sf::VideoMode({ wWidth, wHeight }), "Sad Guy");
 	m_window.setFramerateLimit(m_fps);
 
 	changeScene("MENU", std::make_shared<Scene_Menu>(this));
