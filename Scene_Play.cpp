@@ -91,19 +91,19 @@ void Scene_Play::loadLevel(const std::string& filename)
 			fin >> name >> tileGX >> tileGY;
 
 			auto tile = m_entityManager.addEntity("Tile");
-			tile->addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
-			tile->addComponent<CTransform>();
-			tile->addComponent<CDraggable>();
+			tile.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
+			tile.addComponent<CTransform>();
+			tile.addComponent<CDraggable>();
 			if (item == "Decoration")
 			{
-				tile->getComponent<CTransform>().scale = { 5.0, 7.0 };
+				tile.getComponent<CTransform>().scale = { 5.0, 7.0 };
 			}
-			tile->getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, tile);
+			tile.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, tile);
 			if (item == "Tile")
 			{
 				// Decorations should not have a bounding box
-				tile->addComponent<CBoundingBox>(Vec2(tile->getComponent<CAnimation>().animation.getSize().x, tile->getComponent<CAnimation>().animation.getSize().y));
-				tile->addComponent<CState>("ALIVE");
+				tile.addComponent<CBoundingBox>(Vec2(tile.getComponent<CAnimation>().animation.getSize().x, tile.getComponent<CAnimation>().animation.getSize().y));
+				tile.addComponent<CState>("ALIVE");
 			}
 		}
 		else if (item == "Enemy")
@@ -114,11 +114,11 @@ void Scene_Play::loadLevel(const std::string& filename)
 			fin >> name >> tileGX >> tileGY >> damage;
 
 			auto enemy = m_entityManager.addEntity("Enemy");
-			enemy->addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
-			enemy->addComponent<CTransform>();
-			enemy->getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
-			enemy->addComponent<CBoundingBox>(Vec2(enemy->getComponent<CAnimation>().animation.getSize().x * 0.85f, enemy->getComponent<CAnimation>().animation.getSize().y * 0.85f));
-			enemy->addComponent<CState>("ALIVE");
+			enemy.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
+			enemy.addComponent<CTransform>();
+			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
+			enemy.addComponent<CBoundingBox>(Vec2(enemy.getComponent<CAnimation>().animation.getSize().x * 0.85f, enemy.getComponent<CAnimation>().animation.getSize().y * 0.85f));
+			enemy.addComponent<CState>("ALIVE");
 		}
 		else if (item == "Player")
 		{
@@ -155,24 +155,24 @@ void Scene_Play::spawnPlayer()
 {
 	// Here is a sample player entity which you can use to construct other entities
 	m_player = m_entityManager.addEntity("Player");
-	m_player->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
-	m_player->addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
-	m_player->addComponent<CState>().state = "JUMPING";
-	m_player->addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
-	m_player->addComponent<CGravity>(m_playerConfig.gravity);
+	m_player.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
+	m_player.addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
+	m_player.addComponent<CState>().state = "JUMPING";
+	m_player.addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
+	m_player.addComponent<CGravity>(m_playerConfig.gravity);
 }
 
 void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
 {
 	// TODO: This should spawn a bullet at the given entity, going in the direction the entity is facing
 	auto bullet = m_entityManager.addEntity("Bullet");
-	bullet->addComponent<CTransform>(Vec2(entity->getComponent<CTransform>().pos.x, entity->getComponent<CTransform>().pos.y));
-	bullet->getComponent<CTransform>().scale = entity->getComponent<CTransform>().scale;
-	bullet->getComponent<CTransform>().velocity.x = bullet->getComponent<CTransform>().scale.x * 15;
-	bullet->addComponent<CAnimation>(m_game->assets().getAnimation("BulletAlive"), true);
-	bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize() * 0.90f);
-	bullet->addComponent<CState>("ALIVE");
-	bullet->addComponent<CLifespan>(600, m_currentFrame);
+	bullet.addComponent<CTransform>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y));
+	bullet.getComponent<CTransform>().scale = entity.getComponent<CTransform>().scale;
+	bullet.getComponent<CTransform>().velocity.x = bullet.getComponent<CTransform>().scale.x * 15;
+	bullet.addComponent<CAnimation>(m_game->assets().getAnimation("BulletAlive"), true);
+	bullet.addComponent<CBoundingBox>(bullet.getComponent<CAnimation>().animation.getSize() * 0.90f);
+	bullet.addComponent<CState>("ALIVE");
+	bullet.addComponent<CLifespan>(600, m_currentFrame);
 }
 
 void Scene_Play::update()
@@ -195,9 +195,9 @@ void Scene_Play::sDragAndDrop()
 {
 	for (auto e : m_entityManager.getEntities())
 	{
-		if (e->hasComponent<CDraggable>() && e->getComponent<CDraggable>().dragging)
+		if (e.hasComponent<CDraggable>() && e.getComponent<CDraggable>().dragging)
 		{
-			e->getComponent<CTransform>().pos = windowToWorld(m_mPos);
+			e.getComponent<CTransform>().pos = windowToWorld(m_mPos);
 		}
 	}
 }
@@ -206,11 +206,11 @@ void Scene_Play::sLifespan()
 {
 	for (auto& e : m_entityManager.getEntities())
 	{
-		if (e->hasComponent<CLifespan>())
+		if (e.hasComponent<CLifespan>())
 		{
-			if (m_currentFrame - e->getComponent<CLifespan>().frameCreated > e->getComponent<CLifespan>().lifespan)
+			if (m_currentFrame - e.getComponent<CLifespan>().frameCreated > e.getComponent<CLifespan>().lifespan)
 			{
-				e->destroy();
+				e.destroy();
 			}
 		}
 	}
@@ -240,46 +240,46 @@ void Scene_Play::sStatus()
 
 	for (auto& e : m_entityManager.getEntities())
 	{
-		if (e->hasComponent<CState>())
+		if (e.hasComponent<CState>())
 		{
-			if (e->tag() == "Player")
+			if (e.tag() == "Player")
 			{
-				if (e->getComponent<CState>().state == "IDLE" && e->getComponent<CAnimation>().animation.getName() != "PlayerIdle")
+				if (e.getComponent<CState>().state == "IDLE" && e.getComponent<CAnimation>().animation.getName() != "PlayerIdle")
 				{
-					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerIdle");
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerIdle");
 				}
-				else if (e->getComponent<CState>().state == "JUMPING" && e->getComponent<CAnimation>().animation.getName() != "PlayerJump")
+				else if (e.getComponent<CState>().state == "JUMPING" && e.getComponent<CAnimation>().animation.getName() != "PlayerJump")
 				{
-					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
 				}
-				else if (e->getComponent<CState>().state == "RUNNING" && e->getComponent<CAnimation>().animation.getName() != "PlayerRun")
+				else if (e.getComponent<CState>().state == "RUNNING" && e.getComponent<CAnimation>().animation.getName() != "PlayerRun")
 				{
-					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerRun");
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerRun");
 				}
-				else if (e->getComponent<CState>().state == "SHOOTING")
+				else if (e.getComponent<CState>().state == "SHOOTING")
 				{
 					// TODO
 				}
-				else if (e->getComponent<CState>().state == "CROUCHING")
+				else if (e.getComponent<CState>().state == "CROUCHING")
 				{
 					// TODO
 				}
 			}
-			else if (e->tag() == "Bullet")
+			else if (e.tag() == "Bullet")
 			{
-				if (e->getComponent<CState>().state == "DEAD" && e->getComponent<CAnimation>().animation.getName() != "BulletDead")
+				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getName() != "BulletDead")
 				{
-					e->getComponent<CTransform>().velocity = Vec2(0, 0);
-					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
-					e->getComponent<CAnimation>().repeat = false;
+					e.getComponent<CTransform>().velocity = Vec2(0, 0);
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
+					e.getComponent<CAnimation>().repeat = false;
 				}
 			}
-			else if (e->tag() == "Tile")
+			else if (e.tag() == "Tile")
 			{
-				if (e->getComponent<CState>().state == "DEAD" && e->getComponent<CAnimation>().animation.getName() != "GroundDead")
+				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getName() != "GroundDead")
 				{
-					e->getComponent<CAnimation>().animation = m_game->assets().getAnimation("GroundDead");
-					e->getComponent<CAnimation>().repeat = false;
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("GroundDead");
+					e.getComponent<CAnimation>().repeat = false;
 				}
 			}
 		}
@@ -288,95 +288,95 @@ void Scene_Play::sStatus()
 
 void Scene_Play::sMovement()
 {
-	if (m_pIsOnGround && !m_player->getComponent<CInput>().up)
+	if (m_pIsOnGround && !m_player.getComponent<CInput>().up)
 	{
-		m_player->getComponent<CInput>().canJump = true;
+		m_player.getComponent<CInput>().canJump = true;
 	}
 
-	if (m_player->getComponent<CInput>().shoot && m_player->getComponent<CInput>().canShoot)
+	if (m_player.getComponent<CInput>().shoot && m_player.getComponent<CInput>().canShoot)
 	{
 		spawnBullet(m_player);
-		m_player->getComponent<CInput>().canShoot = false;
+		m_player.getComponent<CInput>().canShoot = false;
 	}
 
 	for (auto e : m_entityManager.getEntities())
 	{
 		// Before we do anything, make a copy of the entity's position
-		e->getComponent<CTransform>().prevPos = e->getComponent<CTransform>().pos;
+		e.getComponent<CTransform>().prevPos = e.getComponent<CTransform>().pos;
 
-		if (e->hasComponent<CGravity>())
+		if (e.hasComponent<CGravity>())
 		{
-			if (e->tag() == "Player")
+			if (e.tag() == "Player")
 			{
 				// SET PLAYER X-VELOCITY
-				if (e->getComponent<CInput>().right || e->getComponent<CInput>().left)
+				if (e.getComponent<CInput>().right || e.getComponent<CInput>().left)
 				{
-					e->getComponent<CTransform>().velocity.x = e->getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
-					e->getComponent<CTransform>().scale.x = e->getComponent<CInput>().right ? 1 : -1;
+					e.getComponent<CTransform>().velocity.x = e.getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
+					e.getComponent<CTransform>().scale.x = e.getComponent<CInput>().right ? 1 : -1;
 					if (m_pIsOnGround)
 					{
-						e->getComponent<CState>().state = "RUNNING";
+						e.getComponent<CState>().state = "RUNNING";
 					}
 				}
-				else if (!e->getComponent<CInput>().right && !e->getComponent<CInput>().left)
+				else if (!e.getComponent<CInput>().right && !e.getComponent<CInput>().left)
 				{
-					e->getComponent<CTransform>().velocity.x = 0.0f;
+					e.getComponent<CTransform>().velocity.x = 0.0f;
 					if (m_pIsOnGround)
 					{
-						e->getComponent<CState>().state = "IDLE";
+						e.getComponent<CState>().state = "IDLE";
 					}
 				}
 
 				// SET PLAYER Y-VELOCITY
-				if (e->getComponent<CInput>().up && e->getComponent<CInput>().canJump && m_pIsOnGround)
+				if (e.getComponent<CInput>().up && e.getComponent<CInput>().canJump && m_pIsOnGround)
 				{
-					e->getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
-					e->getComponent<CState>().state = "JUMPING";
-					e->getComponent<CInput>().canJump = false;
+					e.getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
+					e.getComponent<CState>().state = "JUMPING";
+					e.getComponent<CInput>().canJump = false;
 					m_pIsOnGround = false;
 				}
-				else if (!e->getComponent<CInput>().canJump && !m_pIsOnGround && e->getComponent<CInput>().up)
+				else if (!e.getComponent<CInput>().canJump && !m_pIsOnGround && e.getComponent<CInput>().up)
 				{
-					e->getComponent<CTransform>().velocity.y += e->getComponent<CTransform>().velocity.y + e->getComponent<CGravity>().gravity;
+					e.getComponent<CTransform>().velocity.y += e.getComponent<CTransform>().velocity.y + e.getComponent<CGravity>().gravity;
 				}
-				else if (!e->getComponent<CInput>().canJump && !m_pIsOnGround && !e->getComponent<CInput>().up)
+				else if (!e.getComponent<CInput>().canJump && !m_pIsOnGround && !e.getComponent<CInput>().up)
 				{
-					e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+					e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
 				}
 				else
 				{
-					e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+					e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
 				}
 
-				e->getComponent<CGravity>().gravity *= 1.1;
+				e.getComponent<CGravity>().gravity *= 1.1;
 			}
 			else
 			{
-				e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+				e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
 			}
 		}
 
 		// Cap entities speed in all directions using player's max speed (ideally entities should have their own max speed)
-		if (e->getComponent<CTransform>().velocity.x > m_playerConfig.maxSpeed)
+		if (e.getComponent<CTransform>().velocity.x > m_playerConfig.maxSpeed)
 		{
-			e->getComponent<CTransform>().velocity.x = m_playerConfig.maxSpeed;
+			e.getComponent<CTransform>().velocity.x = m_playerConfig.maxSpeed;
 		}
-		if (e->getComponent<CTransform>().velocity.x < -m_playerConfig.maxSpeed)
+		if (e.getComponent<CTransform>().velocity.x < -m_playerConfig.maxSpeed)
 		{
-			e->getComponent<CTransform>().velocity.x = -m_playerConfig.maxSpeed;
+			e.getComponent<CTransform>().velocity.x = -m_playerConfig.maxSpeed;
 		}
-		if (e->getComponent<CTransform>().velocity.y > m_playerConfig.maxSpeed)
+		if (e.getComponent<CTransform>().velocity.y > m_playerConfig.maxSpeed)
 		{
-			e->getComponent<CTransform>().velocity.y = m_playerConfig.maxSpeed;
+			e.getComponent<CTransform>().velocity.y = m_playerConfig.maxSpeed;
 		}
-		if (e->getComponent<CTransform>().velocity.y < -m_playerConfig.maxSpeed)
+		if (e.getComponent<CTransform>().velocity.y < -m_playerConfig.maxSpeed)
 		{
-			e->getComponent<CTransform>().velocity.y = -m_playerConfig.maxSpeed;
+			e.getComponent<CTransform>().velocity.y = -m_playerConfig.maxSpeed;
 		}
 
 
 		// Velocity has been managed, now update entity position using the updated volocity
-		e->getComponent<CTransform>().pos += e->getComponent<CTransform>().velocity;
+		e.getComponent<CTransform>().pos += e.getComponent<CTransform>().velocity;
 	}
 }
 
@@ -384,7 +384,7 @@ void Scene_Play::sCollision()
 {
 	// Player collision with tiles
 	Vec2 overlap(0, 0);
-	auto& pPos = m_player->getComponent<CTransform>();
+	auto& pPos = m_player.getComponent<CTransform>();
 
 	for (auto& e : m_entityManager.getEntities("Tile"))
 	{
@@ -401,7 +401,7 @@ void Scene_Play::sCollision()
 					// Falling into a block
 					pPos.pos.y -= overlap.y;
 					pPos.velocity.y = 0.0f;
-					m_player->getComponent<CGravity>().gravity = m_playerConfig.gravity;
+					m_player.getComponent<CGravity>().gravity = m_playerConfig.gravity;
 					m_pIsOnGround = true;
 				}
 				else
@@ -435,21 +435,21 @@ void Scene_Play::sCollision()
 			overlap = Physics::GetOverlap(e, b);
 			if (overlap.x > 0 && overlap.y > 0)
 			{
-				b->getComponent<CState>().state = "DEAD";
-				e->getComponent<CState>().state = "DEAD";
+				b.getComponent<CState>().state = "DEAD";
+				e.getComponent<CState>().state = "DEAD";
 			}
 		}
 	}
 
 	// Not using bounding box here since we want the player to completely exit the screen before we respawn them
-	if (m_player->getComponent<CTransform>().pos.y > m_game->window().getSize().y + m_player->getComponent<CAnimation>().animation.getSize().y)
+	if (m_player.getComponent<CTransform>().pos.y > m_game->window().getSize().y + m_player.getComponent<CAnimation>().animation.getSize().y)
 	{
-		m_player->getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player);
+		m_player.getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player);
 	}
 	// Player can not walk off the left side of the screen
-	if (m_player->getComponent<CTransform>().pos.x - m_player->getComponent<CBoundingBox>().halfSize.x < 0)
+	if (m_player.getComponent<CTransform>().pos.x - m_player.getComponent<CBoundingBox>().halfSize.x < 0)
 	{
-		m_player->getComponent<CTransform>().pos.x = m_player->getComponent<CBoundingBox>().halfSize.x;
+		m_player.getComponent<CTransform>().pos.x = m_player.getComponent<CBoundingBox>().halfSize.x;
 	}
 }
 
@@ -475,10 +475,10 @@ void Scene_Play::sDoAction(const Action& action)
 			//std::cout << "Mouse clicked at: " << worldPos.x << ", " << worldPos.y << std::endl;
 			for (auto& e : m_entityManager.getEntities())
 			{
-				if (e->hasComponent<CDraggable>() && isInside(worldPos, e))
+				if (e.hasComponent<CDraggable>() && isInside(worldPos, e))
 				{
-					std::cout << "CLICKED ON ENTITY: " << e->getComponent<CAnimation>().animation.getName() << std::endl;
-					e->getComponent<CDraggable>().dragging = !e->getComponent<CDraggable>().dragging;
+					std::cout << "CLICKED ON ENTITY: " << e.getComponent<CAnimation>().animation.getName() << std::endl;
+					e.getComponent<CDraggable>().dragging = !e.getComponent<CDraggable>().dragging;
 				}
 			}
 		}
@@ -496,8 +496,8 @@ void Scene_Play::sDoAction(const Action& action)
 		if (action.name() == "RIGHT")				{ m_player->getComponent<CInput>().right = false; }
 		if (action.name() == "SHOOT") 
 		{
-			m_player->getComponent<CInput>().canShoot = true;
-			m_player->getComponent<CInput>().shoot = false;
+			m_player.getComponent<CInput>().canShoot = true;
+			m_player.getComponent<CInput>().shoot = false;
 		}
 	}
 }
