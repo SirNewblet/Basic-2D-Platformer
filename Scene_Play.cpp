@@ -8,10 +8,10 @@
 #include <iostream>
 #include <fstream>
 
-bool isInside(Vec2 pos, std::shared_ptr<Entity> e)
+bool isInside(Vec2 pos, Entity e)
 {
-	auto ePos = e->getComponent<CTransform>().pos;
-	auto size = e->getComponent<CAnimation>().animation.getSize();
+	auto ePos = e.getComponent<CTransform>().pos;
+	auto size = e.getComponent<CAnimation>().animation.getSize();
 	float dx = fabs(pos.x - ePos.x);
 	float dy = fabs(pos.y - ePos.y);
 
@@ -47,7 +47,7 @@ void Scene_Play::init(const std::string& levelPath)
 }
 
 // IMPORTANT: Always add the CAnimation component first so that gridToMidPixel can compute correctly
-Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity)
+Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, Entity entity)
 {
 	//			This function takes in a grid (x, y) position and an Entity
 	//			Return a Vec2 indicating where the CENTER position of the Entity should be
@@ -56,8 +56,8 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity
 	//			The bottom-left corner of the Animation should align with the bottom left of the grid cell
 
 	float x = 0.0f, y = 0.0f;
-	x = (gridX * m_gridSize.x) + (entity->getComponent<CAnimation>().animation.getSize().x / 2);
-	y = m_game->window().getSize().y - (gridY * m_gridSize.y) - (entity->getComponent<CAnimation>().animation.getSize().y / 2 * entity->getComponent<CTransform>().scale.y);
+	x = (gridX * m_gridSize.x) + (entity.getComponent<CAnimation>().animation.getSize().x / 2);
+	y = m_game->window().getSize().y - (gridY * m_gridSize.y) - (entity.getComponent<CAnimation>().animation.getSize().y / 2 * entity.getComponent<CTransform>().scale.y);
 
 	return Vec2(x, y);
 }
@@ -136,6 +136,8 @@ void Scene_Play::loadLevel(const std::string& filename)
 	}
 
 	spawnPlayer();
+
+
 	//      NOTE:
 	//------  THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE  ----------
 	//		Components are now returned as references rather than pointers. If you
@@ -153,8 +155,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 void Scene_Play::spawnPlayer()
 {
-	// Here is a sample player entity which you can use to construct other entities
-	m_player = m_entityManager.addEntity("Player");
+	//m_player = m_entityManager.addEntity("Player");
 	m_player.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
 	m_player.addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
 	m_player.addComponent<CState>().state = "JUMPING";
@@ -162,7 +163,7 @@ void Scene_Play::spawnPlayer()
 	m_player.addComponent<CGravity>(m_playerConfig.gravity);
 }
 
-void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
+void Scene_Play::spawnBullet(Entity entity)
 {
 	// TODO: This should spawn a bullet at the given entity, going in the direction the entity is facing
 	auto bullet = m_entityManager.addEntity("Bullet");
@@ -204,7 +205,7 @@ void Scene_Play::sDragAndDrop()
 
 void Scene_Play::sLifespan()
 {
-	for (auto& e : m_entityManager.getEntities())
+	for (auto e : m_entityManager.getEntities())
 	{
 		if (e.hasComponent<CLifespan>())
 		{
@@ -238,7 +239,7 @@ void Scene_Play::sStatus()
 	// - LIVING
 	// - DYING // Dying takes time, set animation depending on frames for the animation, once the animation ends, sAnimation() calls destroy() on the entity
 
-	for (auto& e : m_entityManager.getEntities())
+	for (auto e : m_entityManager.getEntities())
 	{
 		if (e.hasComponent<CState>())
 		{
@@ -386,7 +387,7 @@ void Scene_Play::sCollision()
 	Vec2 overlap(0, 0);
 	auto& pPos = m_player.getComponent<CTransform>();
 
-	for (auto& e : m_entityManager.getEntities("Tile"))
+	for (auto e : m_entityManager.getEntities("Tile"))
 	{
 		overlap = Physics::GetOverlap(e, m_player);
 		// Collision detected
@@ -430,7 +431,7 @@ void Scene_Play::sCollision()
 			}
 		}
 
-		for (auto& b : m_entityManager.getEntities("Bullet"))
+		for (auto b : m_entityManager.getEntities("Bullet"))
 		{
 			overlap = Physics::GetOverlap(e, b);
 			if (overlap.x > 0 && overlap.y > 0)
@@ -463,17 +464,17 @@ void Scene_Play::sDoAction(const Action& action)
 		if (action.name() == "TOGGLE_GRID")			{ m_drawGrid = !m_drawGrid; }
 		if (action.name() == "PAUSE")				{ setPaused(!m_paused); }
 		if (action.name() == "QUIT")				{ onEnd(); }
-		if (action.name() == "JUMP")				{m_player->getComponent<CInput>().up = true; }
-		if (action.name() == "CROUCH")				{ m_player->getComponent<CInput>().down = true; }
-		if (action.name() == "LEFT")				{ m_player->getComponent<CInput>().left = true; }
-		if (action.name() == "RIGHT")				{ m_player->getComponent<CInput>().right = true; }
-		if (action.name() == "SHOOT")				{ m_player->getComponent<CInput>().shoot = true; }
-		if (action.name() == "SPECIAL")				{ m_player->getComponent<CInput>().special = true; }
+		if (action.name() == "JUMP")				{ m_player.getComponent<CInput>().up = true; }
+		if (action.name() == "CROUCH")				{ m_player.getComponent<CInput>().down = true; }
+		if (action.name() == "LEFT")				{ m_player.getComponent<CInput>().left = true; }
+		if (action.name() == "RIGHT")				{ m_player.getComponent<CInput>().right = true; }
+		if (action.name() == "SHOOT")				{ m_player.getComponent<CInput>().shoot = true; }
+		if (action.name() == "SPECIAL")				{ m_player.getComponent<CInput>().special = true; }
 		if (action.name() == "LEFT_CLICK")			
 		{ 
 			Vec2 worldPos = windowToWorld(action.pos());
 			//std::cout << "Mouse clicked at: " << worldPos.x << ", " << worldPos.y << std::endl;
-			for (auto& e : m_entityManager.getEntities())
+			for (auto e : m_entityManager.getEntities())
 			{
 				if (e.hasComponent<CDraggable>() && isInside(worldPos, e))
 				{
@@ -490,10 +491,10 @@ void Scene_Play::sDoAction(const Action& action)
 	}
 	else if (action.type() == "END")
 	{
-		if (action.name() == "JUMP")				{ m_player->getComponent<CInput>().up = false; }
-		if (action.name() == "CROUCH")				{ m_player->getComponent<CInput>().down = false; }
-		if (action.name() == "LEFT")				{ m_player->getComponent<CInput>().left = false; }
-		if (action.name() == "RIGHT")				{ m_player->getComponent<CInput>().right = false; }
+		if (action.name() == "JUMP")				{ m_player.getComponent<CInput>().up = false; }
+		if (action.name() == "CROUCH")				{ m_player.getComponent<CInput>().down = false; }
+		if (action.name() == "LEFT")				{ m_player.getComponent<CInput>().left = false; }
+		if (action.name() == "RIGHT")				{ m_player.getComponent<CInput>().right = false; }
 		if (action.name() == "SHOOT") 
 		{
 			m_player.getComponent<CInput>().canShoot = true;
@@ -504,23 +505,23 @@ void Scene_Play::sDoAction(const Action& action)
 
 void Scene_Play::sAnimation()
 {
-	for (auto& e : m_entityManager.getEntities())
+	for (auto e : m_entityManager.getEntities())
 	{
-		if (e->hasComponent<CAnimation>())
+		if (e.hasComponent<CAnimation>())
 		{
-			if (e->getComponent<CAnimation>().repeat)
+			if (e.getComponent<CAnimation>().repeat)
 			{
-				e->getComponent<CAnimation>().animation.update();
+				e.getComponent<CAnimation>().animation.update();
 			}
 			else
 			{
-				if (e->getComponent<CAnimation>().animation.hasEnded())
+				if (e.getComponent<CAnimation>().animation.hasEnded())
 				{
-					e->destroy();
+					e.destroy();
 				}
 				else
 				{
-					e->getComponent<CAnimation>().animation.update();
+					e.getComponent<CAnimation>().animation.update();
 				}
 			}
 		}
@@ -534,7 +535,7 @@ void Scene_Play::sRender()
 	else { m_game->window().clear(sf::Color(0xa83ea8)); }
 
 	// Set the viewport of the window to be centered on the player if it's far enough right
-	auto& pPos = m_player->getComponent<CTransform>().pos;
+	auto& pPos = m_player.getComponent<CTransform>().pos;
 	float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, pPos.x);
 	sf::View view = m_game->window().getView();
 	view.setCenter({ windowCenterX, m_game->window().getSize().y - view.getCenter().y });
@@ -545,11 +546,11 @@ void Scene_Play::sRender()
 	{
 		for (auto e : m_entityManager.getEntities())
 		{
-			auto& transform = e->getComponent<CTransform>();
+			auto& transform = e.getComponent<CTransform>();
 
-			if (e->hasComponent<CAnimation>())
+			if (e.hasComponent<CAnimation>())
 			{
-				auto& animation = e->getComponent<CAnimation>().animation;
+				auto& animation = e.getComponent<CAnimation>().animation;
 				animation.getSprite().setRotation(sf::degrees(transform.angle));
 				animation.getSprite().setPosition({ transform.pos.x, transform.pos.y });
 				animation.getSprite().setScale({ transform.scale.x, transform.scale.y });
@@ -563,10 +564,10 @@ void Scene_Play::sRender()
 	{
 		for (auto e : m_entityManager.getEntities())
 		{
-			if (e->hasComponent<CBoundingBox>())
+			if (e.hasComponent<CBoundingBox>())
 			{
-				auto& box = e->getComponent<CBoundingBox>();
-				auto& transform = e->getComponent<CTransform>();
+				auto& box = e.getComponent<CBoundingBox>();
+				auto& transform = e.getComponent<CTransform>();
 				sf::RectangleShape rect;
 				rect.setSize(sf::Vector2f(box.size.x - 1, box.size.y - 1));
 				rect.setOrigin(sf::Vector2f(box.halfSize.x, box.halfSize.y));

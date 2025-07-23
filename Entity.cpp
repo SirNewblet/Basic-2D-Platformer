@@ -1,14 +1,12 @@
 #include "Entity.h"
 
-Entity::Entity(const size_t& id) :
+Entity::Entity(const size_t id) :
 	m_id(id)
-{
-
-}
+{ }
 
 void Entity::destroy()
 {
-	m_active = false;
+	EntityMemoryPool::Instance().destroy(m_id);
 }
 
 const size_t Entity::id() const
@@ -18,10 +16,10 @@ const size_t Entity::id() const
 
 bool Entity::isActive() const
 {
-	return m_active;
+	return EntityMemoryPool::Instance().isActive(m_id);
 }
 
 const std::string& Entity::tag() const
 {
-	return m_tag;
+	return EntityMemoryPool::Instance().getTag(m_id);
 }

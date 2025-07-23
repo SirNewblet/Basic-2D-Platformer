@@ -34,10 +34,10 @@ void Scene_Menu::init()
 	m_levelPaths.push_back("levels/level1.txt");
 
 	auto menuCharacter = m_entityManager.addEntity("Tile");
-	menuCharacter->addComponent<CAnimation>(m_game->assets().getAnimation("PlayerRun"), true);
-	menuCharacter->addComponent<CTransform>();
-	menuCharacter->getComponent<CTransform>().scale = { 7, 7 };
-	menuCharacter->getComponent<CTransform>().pos = { (float)m_game->window().getSize().x / 2.0f, (float)m_game->window().getSize().y / 2.0f };
+	menuCharacter.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerRun"), true);
+	menuCharacter.addComponent<CTransform>();
+	menuCharacter.getComponent<CTransform>().scale = { 7, 7 };
+	menuCharacter.getComponent<CTransform>().pos = { (float)m_game->window().getSize().x / 2.0f, (float)m_game->window().getSize().y / 2.0f };
 
 	registerAction(sf::Keyboard::Key::W,		"UP");
 	registerAction(sf::Keyboard::Key::S,		"DOWN");
@@ -88,11 +88,11 @@ void Scene_Menu::sDoAction(const Action& action)
 
 void Scene_Menu::sAnimation()
 {
-	for (auto& e : m_entityManager.getEntities())
+	for (auto e : m_entityManager.getEntities())
 	{
-		if (e->hasComponent<CAnimation>())
+		if (e.hasComponent<CAnimation>())
 		{
-			e->getComponent<CAnimation>().animation.update();
+			e.getComponent<CAnimation>().animation.update();
 		}
 	}
 }
@@ -165,13 +165,13 @@ void Scene_Menu::sRender()
 			m_menuTextBackground.setOutlineThickness(2);
 		}
 
-		for (auto& e : m_entityManager.getEntities())
+		for (auto e : m_entityManager.getEntities())
 		{
-			auto& transform = e->getComponent<CTransform>();
+			auto& transform = e.getComponent<CTransform>();
 
-			if (e->hasComponent<CAnimation>())
+			if (e.hasComponent<CAnimation>())
 			{
-				auto& animation = e->getComponent<CAnimation>().animation;
+				auto& animation = e.getComponent<CAnimation>().animation;
 				animation.getSprite().setPosition({ transform.pos.x, transform.pos.y });
 				animation.getSprite().setScale({ transform.scale.x, transform.scale.y });
 				m_game->window().draw(animation.getSprite());

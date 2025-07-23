@@ -20,14 +20,23 @@ typedef std::tuple<
 
 class EntityMemoryPool
 {
-	size_t							m_numEntities;
+	size_t							m_numEntities = 0;
+	const size_t					m_maxEntities;
 	EntityComponentVectorTuple		m_pool;
 	std::vector<std::string>		m_tags;
 	std::vector<bool>				m_active;
 
 	EntityMemoryPool(size_t maxEntities);
+	void reserveAll(size_t maxEntities);
 
 public:
+
+	const std::string& getTag(size_t entityId) const;
+	bool isActive(size_t entityId) const;
+	void destroy(size_t entityId);
+	size_t getNextEntityIndex();
+	Entity addEntity(const std::string& tag);
+
 	static EntityMemoryPool& Instance()
 	{
 		static EntityMemoryPool pool(MAX_ENTITIES);
@@ -35,57 +44,35 @@ public:
 	}
 
 	template <typename T>
-	T& getComponent(size_t entityId)
+	T& getComponent(size_t id)
 	{
-		return std::get<std::vector<T>>(m_pool)[entityId];
+		return std::get<std::vector<T>>(m_pool)[id];
 	}
 
-	template <typename T>
-	const T& getComponent(size_t entityId) const
-	{
-		return std::get<std::vector<T>>(m_pool)[entityId];
-	}
+	//template <typename T>
+	//const T& getComponent(size_t id) const
+	//{
+	//	return std::get<std::vector<T>>(m_pool)[id];
+	//}
 
 	template <typename T>
-	T& hasComponent(size_t entityId)
+	bool hasComponent(size_t id)
 	{
-		return std::get<std::vector<T>>(m_data)[entityId].has;
+		return std::get<std::vector<T>>(m_pool)[id].has;
 	}
 
 	template <typename T, typename... TArgs>
-	T& addComponent(TArgs&&... mArgs)
+	T& addComponent(size_t id, TArgs&&... mArgs)
 	{
-		auto& component = getComponent<T>();
+		auto& component = getComponent<T>(id);
 		component = T(std::forward<TArgs>(mArgs)...);
 		component.has = true;
 		return component;
 	}
 
 	template <typename T>
-	size_t getNextEntityIndex()
+	void removeComponent(size_t id)
 	{
-		auto pp = std::get<std::vector<T>>(m_pool);
-
-		return 0;
-	}
-
-	template <typename T>
-	void removeComponent(size_t entityId)
-	{
-		getComponent<T>(entityId) = T(entityId);
-	}
-
-	Entity addEntity(const std::string& tag)
-	{
-		size_t index = getNextEntityIndex();
-
-		m_tags[index] = tag;
-		m_active[index] = true;
-		return Entity(index);
-	}
-
-	const std::string& getTag(size_t entityId) const
-	{
-		return m_tags[entityId];
+		getComponent<T>(id) = T(id);
 	}
 };
