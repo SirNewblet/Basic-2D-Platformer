@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components.h"
-#include "Entity.h"
+//#include "Entity.h"
 
 #include <vector>
 #include <string>
@@ -17,6 +17,8 @@ typedef std::tuple<
 	std::vector<CGravity>,
 	std::vector<CState>,
 	std::vector<CDraggable>> EntityComponentVectorTuple;
+
+class Entity;
 
 class EntityMemoryPool
 {

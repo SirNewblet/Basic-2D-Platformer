@@ -23,7 +23,7 @@ public:
 	template <typename T, typename... TArgs>
 	T& addComponent(TArgs&&... mArgs)
 	{
-		return EntityMemoryPool::Instance().addComponent<T>(m_id, mArgs);
+		return EntityMemoryPool::Instance().addComponent<T>(m_id, std::forward<TArgs>(mArgs)...);
 	}
 
 	template <typename T>

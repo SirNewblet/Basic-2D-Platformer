@@ -1,4 +1,5 @@
 #include "EntityMemoryPool.h"
+#include "Entity.h"
 
 EntityMemoryPool::EntityMemoryPool(size_t maxEnts) :
 	m_maxEntities(maxEnts)
@@ -9,10 +10,10 @@ EntityMemoryPool::EntityMemoryPool(size_t maxEnts) :
 void EntityMemoryPool::reserveAll(size_t maxNum)
 {
 	// Allocated memory for every vector using MAX_ENTITIES
-	m_tags.reserve(maxNum);
-	m_active.reserve(maxNum);
+	m_tags.resize(maxNum);
+	m_active.resize(maxNum, false);
 	std::apply([maxNum](auto&... vectors) {
-		(..., vectors.reserve(maxNum));
+		(..., vectors.resize(maxNum));
 		}, m_pool);
 }
 
@@ -32,13 +33,13 @@ bool EntityMemoryPool::isActive(size_t id) const
 }
 
 Entity EntityMemoryPool::addEntity(const std::string& tag)
-	{
+{
 	size_t index = getNextEntityIndex();
 
 	m_tags[index] = tag;
 	m_active[index] = true;
 	return Entity(index);
-	}
+}
 
 size_t EntityMemoryPool::getNextEntityIndex()
 {

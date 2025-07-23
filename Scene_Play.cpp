@@ -21,7 +21,8 @@ bool isInside(Vec2 pos, Entity e)
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath) :
 	Scene(gameEngine),
 	m_levelPath(levelPath),
-	m_gridText(m_game->assets().getFont("Sooky"))
+	m_gridText(m_game->assets().getFont("Sooky")),
+	m_player(m_entityManager.addEntity("Player"))
 {
 	init(m_levelPath);
 }

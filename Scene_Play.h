@@ -15,7 +15,7 @@ class Scene_Play : public Scene
 	};
 
 protected:
-	Entity								m_player = m_entityManager.addEntity("Player");
+	Entity								m_player;
 	std::string							m_levelPath;
 	std::string							m_lastAction;
 	PlayerConfig						m_playerConfig;
