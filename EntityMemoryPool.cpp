@@ -32,13 +32,13 @@ bool EntityMemoryPool::isActive(size_t id) const
 }
 
 Entity EntityMemoryPool::addEntity(const std::string& tag)
-{
+	{
 	size_t index = getNextEntityIndex();
 
 	m_tags[index] = tag;
 	m_active[index] = true;
 	return Entity(index);
-}
+	}
 
 size_t EntityMemoryPool::getNextEntityIndex()
 {
