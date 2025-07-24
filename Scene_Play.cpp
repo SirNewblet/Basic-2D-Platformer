@@ -22,7 +22,7 @@ Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath) :
 	Scene(gameEngine),
 	m_levelPath(levelPath),
 	m_gridText(m_game->assets().getFont("Sooky")),
-	m_player(m_entityManager.addEntity("Player"))
+	m_player(m_entityManager.addEntity("Default"))
 {
 	init(m_levelPath);
 }
@@ -156,7 +156,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 void Scene_Play::spawnPlayer()
 {
-	//m_player = m_entityManager.addEntity("Player");
+	m_player = m_entityManager.addEntity("Player");
 	m_player.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerJump"), true);
 	m_player.addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
 	m_player.addComponent<CState>().state = "JUMPING";
@@ -166,11 +166,10 @@ void Scene_Play::spawnPlayer()
 
 void Scene_Play::spawnBullet(Entity entity)
 {
-	// TODO: This should spawn a bullet at the given entity, going in the direction the entity is facing
 	auto bullet = m_entityManager.addEntity("Bullet");
 	bullet.addComponent<CTransform>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y));
 	bullet.getComponent<CTransform>().scale = entity.getComponent<CTransform>().scale;
-	bullet.getComponent<CTransform>().velocity.x = bullet.getComponent<CTransform>().scale.x * 15;
+	bullet.getComponent<CTransform>().velocity.x = 0.5f; // bullet.getComponent<CTransform>().scale.x * 15;
 	bullet.addComponent<CAnimation>(m_game->assets().getAnimation("BulletAlive"), true);
 	bullet.addComponent<CBoundingBox>(bullet.getComponent<CAnimation>().animation.getSize() * 0.90f);
 	bullet.addComponent<CState>("ALIVE");

@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-static const size_t MAX_ENTITIES = 10000;
+static const size_t MAX_ENTITIES = 100000;
 
 typedef std::tuple<
 	std::vector<CTransform>,
@@ -38,6 +38,8 @@ public:
 	void destroy(size_t entityId);
 	size_t getNextEntityIndex();
 	Entity addEntity(const std::string& tag);
+	std::vector<Entity> getEntities();
+	std::vector<Entity>& getEntities(const std::string& tag);
 
 	static EntityMemoryPool& Instance()
 	{

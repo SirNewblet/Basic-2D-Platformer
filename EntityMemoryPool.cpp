@@ -1,5 +1,6 @@
 #include "EntityMemoryPool.h"
 #include "Entity.h"
+#include <iostream>
 
 EntityMemoryPool::EntityMemoryPool(size_t maxEnts) :
 	m_maxEntities(maxEnts)
@@ -41,6 +42,36 @@ Entity EntityMemoryPool::addEntity(const std::string& tag)
 	return Entity(index);
 }
 
+std::vector<Entity> EntityMemoryPool::getEntities()
+{
+	std::vector<Entity> taggedEntities;
+
+	for (int i = 0; i < MAX_ENTITIES; i++)
+	{
+		if (m_active[i])
+		{
+			taggedEntities.push_back(std::get<std::vector<Entity>>(m_pool)[i]);
+		}
+	}
+
+	return taggedEntities;
+}
+
+std::vector<Entity>& EntityMemoryPool::getEntities(const std::string& tag)
+{
+	std::vector<Entity> taggedEntities;
+
+	for (int i = 0; i < MAX_ENTITIES; i++)
+	{
+		if (m_tags[i] == tag && m_active[i])
+		{
+			taggedEntities.push_back(std::get<std::vector<Entity>>(m_pool)[i]);
+		}
+	}
+
+	return taggedEntities;
+}
+
 size_t EntityMemoryPool::getNextEntityIndex()
 {
 	if (m_numEntities < MAX_ENTITIES)
@@ -64,6 +95,7 @@ size_t EntityMemoryPool::getNextEntityIndex()
 		// TODO
 		// Handle error here for exceeding max num of entities allowed
 		// but for now do nothing (don't add entity)
+		std::cout << "Max entity count exceeded!!!" << std::endl;
 	}
 
 	return 0;

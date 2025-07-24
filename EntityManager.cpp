@@ -42,17 +42,20 @@ void EntityManager::removeDeadEntities(EntityVec& vec)
 
 Entity EntityManager::addEntity(const std::string& tag)
 {
-	auto e = EntityMemoryPool::Instance().addEntity(tag);
-	m_entitiesToAdd.push_back(e);
-	return e;
+	//auto e = EntityMemoryPool::Instance().addEntity(tag);
+	//m_entitiesToAdd.push_back(e);
+	//
+	// return e;
+
+	return EntityMemoryPool::Instance().addEntity(tag);
 }
 
 const EntityVec& EntityManager::getEntities()
 {
-	return m_entities;
+	return EntityMemoryPool::Instance().getEntities();
 }
 
 const EntityVec& EntityManager::getEntities(const std::string& tag)
 {
-	return m_entityMap[tag];
+	return EntityMemoryPool::Instance().getEntities(tag);
 }
