@@ -137,6 +137,7 @@
     <ClCompile Include="CodingCPPAssignment3.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
+    <ClCompile Include="EntityMemoryPool.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="MemoryMapping.cpp" />
     <ClCompile Include="Physics.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="Components.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
+    <ClInclude Include="EntityMemoryPool.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="MemoryMapping.h" />
     <ClInclude Include="Physics.h" />

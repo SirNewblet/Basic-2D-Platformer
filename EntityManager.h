@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Entity.h"
+#include "Components.h"
+#include "EntityMemoryPool.h"
 
 #include <vector>
 #include <map>
 
-typedef std::vector<std::shared_ptr<Entity>> EntityVec;
+typedef std::vector<Entity> EntityVec;
 
 class EntityManager
 {
@@ -18,12 +20,11 @@ class EntityManager
 	void removeDeadEntities(EntityVec& vec);
 
 public:
-
 	EntityManager();
 
 	void update();
 
-	std::shared_ptr<Entity> addEntity(const std::string& tag);
+	Entity addEntity(const std::string& tag);
 
 	const EntityVec& getEntities();
 	const EntityVec& getEntities(const std::string& tag);
