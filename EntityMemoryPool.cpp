@@ -8,18 +8,21 @@ EntityMemoryPool::EntityMemoryPool(size_t maxEnts) :
 	reserveAll(MAX_ENTITIES);
 }
 
-void EntityMemoryPool::reserveAll(size_t maxNum)
+void EntityMemoryPool::reserveAll(size_t max)
 {
 	// Allocated memory for every vector using MAX_ENTITIES
-	m_tags.resize(maxNum);
-	m_active.resize(maxNum, false);
-	std::apply([maxNum](auto&... vectors) {
-		(..., vectors.resize(maxNum));
+	m_tags.resize(max);
+	m_active.resize(max, false);
+	std::apply([max](auto&... vectors) {
+		(..., vectors.resize(max));
 		}, m_pool);
 }
 
 void EntityMemoryPool::destroy(size_t id)
 {
+	// Set all vectors' indices = 0
+	// std::vector<CAnimation>()[index] = 0;
+	removeAllComponents(id);
 	m_active[id] = false;
 }
 
@@ -36,40 +39,9 @@ bool EntityMemoryPool::isActive(size_t id) const
 Entity EntityMemoryPool::addEntity(const std::string& tag)
 {
 	size_t index = getNextEntityIndex();
-
 	m_tags[index] = tag;
 	m_active[index] = true;
 	return Entity(index);
-}
-
-std::vector<Entity> EntityMemoryPool::getEntities()
-{
-	std::vector<Entity> taggedEntities;
-
-	for (int i = 0; i < MAX_ENTITIES; i++)
-	{
-		if (m_active[i])
-		{
-			taggedEntities.push_back(std::get<std::vector<Entity>>(m_pool)[i]);
-		}
-	}
-
-	return taggedEntities;
-}
-
-std::vector<Entity>& EntityMemoryPool::getEntities(const std::string& tag)
-{
-	std::vector<Entity> taggedEntities;
-
-	for (int i = 0; i < MAX_ENTITIES; i++)
-	{
-		if (m_tags[i] == tag && m_active[i])
-		{
-			taggedEntities.push_back(std::get<std::vector<Entity>>(m_pool)[i]);
-		}
-	}
-
-	return taggedEntities;
 }
 
 size_t EntityMemoryPool::getNextEntityIndex()
@@ -99,4 +71,12 @@ size_t EntityMemoryPool::getNextEntityIndex()
 	}
 
 	return 0;
+}
+
+void EntityMemoryPool::removeAllComponents(size_t entityId)
+{
+	std::apply([&](auto&... componentVectors)
+		{
+			(..., (componentVectors[entityId].has = false));
+		}, m_pool);
 }

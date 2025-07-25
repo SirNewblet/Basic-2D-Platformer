@@ -169,7 +169,7 @@ void Scene_Play::spawnBullet(Entity entity)
 	auto bullet = m_entityManager.addEntity("Bullet");
 	bullet.addComponent<CTransform>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y));
 	bullet.getComponent<CTransform>().scale = entity.getComponent<CTransform>().scale;
-	bullet.getComponent<CTransform>().velocity.x = 0.5f; // bullet.getComponent<CTransform>().scale.x * 15;
+	bullet.getComponent<CTransform>().velocity.x = bullet.getComponent<CTransform>().scale.x * 15;
 	bullet.addComponent<CAnimation>(m_game->assets().getAnimation("BulletAlive"), true);
 	bullet.addComponent<CBoundingBox>(bullet.getComponent<CAnimation>().animation.getSize() * 0.90f);
 	bullet.addComponent<CState>("ALIVE");
