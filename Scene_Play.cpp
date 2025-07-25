@@ -187,6 +187,7 @@ void Scene_Play::update()
 	sCollision();
 	sStatus();
 	sAnimation();
+	sCamera();
 	sRender();
 
 	m_currentFrame++;
@@ -220,6 +221,12 @@ void Scene_Play::sLifespan()
 void Scene_Play::sCamera()
 {
 	// TODO: Keep Camera on player unless player runs left / falls down a hole / enters a gate
+	// Set the viewport of the window to be centered on the player if it's far enough right
+	auto& pPos = m_player.getComponent<CTransform>().pos;
+	float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, pPos.x);
+	sf::View view = m_game->window().getView();
+	view.setCenter({ windowCenterX, m_game->window().getSize().y - view.getCenter().y });
+	m_game->window().setView(view);
 }
 
 void Scene_Play::sStatus()
@@ -534,13 +541,6 @@ void Scene_Play::sRender()
 	if (!m_paused) { m_game->window().clear(sf::Color(0xa83e75)); }
 	else { m_game->window().clear(sf::Color(0xa83ea8)); }
 
-	// Set the viewport of the window to be centered on the player if it's far enough right
-	auto& pPos = m_player.getComponent<CTransform>().pos;
-	float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, pPos.x);
-	sf::View view = m_game->window().getView();
-	view.setCenter({ windowCenterX, m_game->window().getSize().y - view.getCenter().y });
-	m_game->window().setView(view);
-
 	// Draw all Entity textures + animations
 	if (m_drawTextures)
 	{
@@ -618,5 +618,8 @@ void Scene_Play::sRender()
 void Scene_Play::onEnd()
 {
 	m_hasEnded = true;
+	sf::View view = m_game->window().getView();
+	view.setCenter({ m_game->window().getSize().x / 2.0f, m_game->window().getSize().y / 2.0f });
+	m_game->window().setView(view);
 	m_game->changeScene("MENU", nullptr, true);
 }
