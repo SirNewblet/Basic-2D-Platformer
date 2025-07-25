@@ -1,3 +1,96 @@
-# Basic 2D Platformer (Squiggle Arm Guy)
+# 🎮 Mr. Squiggles
 
-The purpose of this project is to learn the fundamentals of C++ via game development.
+_A 2D platformer built using C++17 and SFML 3.0.0._
+
+> A sad man with noodles for arms attempts to escape an uninspiring 2D-Platformer world so the guy developing the game can learn new programming skills ;).
+
+---
+
+## 📖 Table of Contents
+
+- [About the Game](#about-the-game)
+- [Features](#features)
+- [Screenshots & GIFs](#screenshots--gifs)
+- [Controls](#controls)
+- [Installation & Running](#installation--running)
+- [Technologies Used](#technologies-used)
+- [Credits](#credits)
+- [License](#license)
+
+---
+
+## 🕹️ About the Game
+
+Mr. Squiggles is no ordinary 64x64 pixel protagonist. He's sad...because that's how I drew the sprite initially and decided to keep it that way. He is traversing through a Halloween world, fighting monsters uglier than himself, evading highly dangerous traps, and collecting little trinkets along the way.
+
+---
+
+## 🚀 Features
+
+Here are some of the highlights of the game:
+
+- ✅ Smooth 2D movement
+- ✅ Tile-based AABB (axis-aligned bounding box) collision system
+- ✅ Enemy AI (patrol, chase, attack) (TODO)
+- ✅ Custom animation system (run, idle, jump, crouch, dash, death, and more!)
+- ✅ Parallax scrolling for immersive world building (TODO)
+- ✅ Scene management system
+- ✅ Pause and settings menu
+- ✅ Audio with SFML Sound & Music
+- ✅ Entity-Component-System (ECS) architecture for modularity
+- ✅ Entity-Component Memory Pooling to take advantage of cache-coherency
+
+---
+
+## 📸 Screenshots & GIFs
+
+> Store your media in a `/media/` folder or link to hosted images. (TODO)
+
+### 🎬 Gameplay
+
+![Gameplay](media/gameplay.gif)
+
+### 🧱 Level Editor Preview
+
+![Editor](media/level_editor.png)
+
+---
+
+## 🎮 Controls
+
+| Action         | Key            |
+|----------------|----------------|
+| Move Left      | A / ←          |
+| Move Right     | D / →          |
+| Jump           | Space / ↑      |
+| Attack         | Enter          |
+| Interact       | N/A            |
+| Pause/Menu     | Esc            |
+
+---
+
+## 💻 Installation & Running
+
+### 🧰 Requirements
+
+- C++17 or newer compiler
+- [SFML 3.0.0](https://www.sfml-dev.org/download.php)
+- CMake (recommended) (TODO)
+- Git (to clone the repo)
+
+### 🔧 Build Instructions (CMake) (TODO)
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/your-game-title.git
+cd your-game-title
+
+# Create a build directory
+mkdir build && cd build
+
+# Run CMake and build
+cmake ..
+cmake --build .
+
+# Run the executable
+./YourGameExecutableName
