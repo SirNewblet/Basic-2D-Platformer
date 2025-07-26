@@ -5,6 +5,7 @@ Texture TexPlayerJump images/PlayerJump.png
 Texture TexPlayerRun images/PlayerRun.png
 Texture TexGround images/Ground.png
 Texture TexGroundDead images/GroundDead.png
+Texture TexLadderBone images/LadderBone.png
 Texture TexNonEnemyTree images/NonEnemyTree.png
 Texture TexEnemyRunnerIdle images/EnemyRunnerIdle.png
 Animation BulletAlive TexBulletAlive 16 2
@@ -15,5 +16,6 @@ Animation PlayerRun TexPlayerRun 5 4
 Animation NonEnemyTree TexNonEnemyTree 4 8
 Animation Ground TexGround 1 0
 Animation GroundDead TexGroundDead 8 2
+Animation LadderBone TexLadderBone 1 0
 Animation EnemyRunner TexEnemyRunnerIdle 8 8
 Font Sooky fonts/sooky.ttf

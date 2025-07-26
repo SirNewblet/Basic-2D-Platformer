@@ -26,6 +26,11 @@ Tile Ground 20 0
 Tile Ground 21 0
 Tile Ground 22 0
 Tile Ground 23 0
+Ladder LadderBone 23 1
+Ladder LadderBone 23 2
+Ladder LadderBone 23 3
+Ladder LadderBone 23 4
+Ladder LadderBone 23 5
 Tile Ground 24 0
 Tile Ground 25 0
 Tile Ground 26 0

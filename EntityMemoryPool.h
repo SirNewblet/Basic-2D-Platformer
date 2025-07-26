@@ -9,14 +9,15 @@
 static const size_t MAX_ENTITIES = 1000000;
 
 typedef std::tuple<
-	std::vector<CTransform>,
-	std::vector<CLifespan>,
-	std::vector<CInput>,
-	std::vector<CBoundingBox>,
 	std::vector<CAnimation>,
+	std::vector<CBoundingBox>,
+	std::vector<CClimbable>,
+	std::vector<CDraggable>,
 	std::vector<CGravity>,
+	std::vector<CInput>,
+	std::vector<CLifespan>,
 	std::vector<CState>,
-	std::vector<CDraggable>> EntityComponentVectorTuple;
+	std::vector<CTransform>> EntityComponentVectorTuple;
 
 class Entity;
 
