@@ -92,31 +92,29 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 			fin >> name >> tileGX >> tileGY;
 
-			auto tile = m_entityManager.addEntity(item);
-			tile.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
-			tile.addComponent<CTransform>();
-			tile.addComponent<CDraggable>();
+			auto entity = m_entityManager.addEntity(item);
+			entity.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
+			entity.addComponent<CTransform>();
+			entity.addComponent<CDraggable>();
 			if (item == "Decoration")
 			{
-				tile.getComponent<CTransform>().scale = { 5.0, 7.0 };
+				// TODO: replace hard-coded values with values from the config (OR - draw decorations in the correct pixel scale)
+				entity.getComponent<CTransform>().scale = { 5.0, 7.0 };
 			}
-			tile.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, tile);
 			if (item == "Tile")
 			{
 				// Decorations should not have a bounding box
-				tile.addComponent<CBoundingBox>(Vec2(tile.getComponent<CAnimation>().animation.getSize().x, tile.getComponent<CAnimation>().animation.getSize().y));
-				tile.addComponent<CState>("ALIVE");
+				entity.addComponent<CBoundingBox>(Vec2(entity.getComponent<CAnimation>().animation.getSize().x, entity.getComponent<CAnimation>().animation.getSize().y));
+				entity.addComponent<CState>("ALIVE");
 			}
 			if (item == "Ladder")
 			{
-				tile.addComponent<CBoundingBox>(Vec2(tile.getComponent<CAnimation>().animation.getSize().x / 2.0f, tile.getComponent<CAnimation>().animation.getSize().y));
-				tile.addComponent<CClimbable>();
+				entity.addComponent<CBoundingBox>(Vec2(entity.getComponent<CAnimation>().animation.getSize().x / 2.0f, entity.getComponent<CAnimation>().animation.getSize().y));
+				entity.addComponent<CClimbable>();
 			}
+
+			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, entity);
 		}
-		//else if (item == "Ladder")
-		//{
-		//	// Create a CClimbable component to be used here to allow the player to climb up the ladder
-		//}
 		else if (item == "Enemy")
 		{
 			int tileGX = 0, tileGY = 0, damage = 0;
@@ -131,6 +129,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
 			enemy.getComponent<CTransform>().pos.y += enemy.getComponent<CAnimation>().animation.getSize().y * 0.15f;
 			enemy.addComponent<CState>("ALIVE");
+			enemy.addComponent<CHealth>();
 		}
 		else if (item == "Player")
 		{
@@ -173,6 +172,7 @@ void Scene_Play::spawnPlayer()
 	m_player.addComponent<CState>().state = "JUMPING";
 	m_player.addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
 	m_player.addComponent<CGravity>(m_playerConfig.gravity);
+	m_player.addComponent<CHealth>();
 }
 
 void Scene_Play::spawnBullet(Entity entity)

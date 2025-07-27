@@ -51,6 +51,15 @@ public:
 	CGravity(float g) : gravity(g) {}
 };
 
+class CHealth : public Component
+{
+public:
+	float maxHealth = 100;
+	float currentHealth = 100;
+
+	CHealth() {};
+};
+
 class CInput : public Component
 {
 public:
