@@ -15,11 +15,9 @@ public:
 	bool repeat = false;
 	CAnimation() {};
 	CAnimation(const Animation& ani) :
-		animation(ani), repeat(false) {
-	}
+		animation(ani), repeat(false) { }
 	CAnimation(const Animation& ani, bool r) :
-		animation(ani), repeat(r) {
-	}
+		animation(ani), repeat(r) { }
 };
 
 class CBoundingBox : public Component

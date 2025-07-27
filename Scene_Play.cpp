@@ -92,7 +92,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 			fin >> name >> tileGX >> tileGY;
 
-			auto tile = m_entityManager.addEntity("Tile");
+			auto tile = m_entityManager.addEntity(item);
 			tile.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			tile.addComponent<CTransform>();
 			tile.addComponent<CDraggable>();
@@ -337,7 +337,7 @@ void Scene_Play::sMovement()
 				if (e.getComponent<CInput>().canClimb && e.getComponent<CInput>().up)
 				{
 					e.getComponent<CState>().state = "CLIMBING";
-					e.getComponent<CTransform>().velocity.y = -3.0f;
+					e.getComponent<CTransform>().velocity.y = -5.0f;
 				}
 				else
 				{
@@ -424,7 +424,7 @@ void Scene_Play::sCollision()
 	{
 		overlap = Physics::GetOverlap(e, m_player);
 		// Collision detected
-		if ((overlap.x > 0 && overlap.y > 0) && !e.hasComponent<CClimbable>())
+		if (overlap.x > 0 && overlap.y > 0)
 		{
 			if (overlap.x > overlap.y)
 			{
@@ -472,6 +472,21 @@ void Scene_Play::sCollision()
 				b.getComponent<CState>().state = "DEAD";
 				e.getComponent<CState>().state = "DEAD";
 			}
+		}
+	}
+
+	for (auto e : m_entityManager.getEntities("Ladder"))
+	{
+		overlap = Physics::GetOverlap(m_player, e);
+		if (overlap.x > 0 && overlap.y > 0)
+		{
+			// If our overlap in the x-direction is > 0 for any "Ladder", we can climb - don't loop over the rest of the "Ladders"
+			m_player.getComponent<CInput>().canClimb = true;
+			break;
+		}
+		else
+		{
+			m_player.getComponent<CInput>().canClimb = false;
 		}
 	}
 
