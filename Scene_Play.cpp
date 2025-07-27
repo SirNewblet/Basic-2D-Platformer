@@ -37,6 +37,7 @@ void Scene_Play::init(const std::string& levelPath)
 
 	registerAction(sf::Keyboard::Key::Space,		"JUMP");
 	registerAction(sf::Keyboard::Key::Enter,		"SHOOT");
+	registerAction(sf::Keyboard::Key::W,			"CLIMB");
 	registerAction(sf::Keyboard::Key::A,			"LEFT");
 	registerAction(sf::Keyboard::Key::D,			"RIGHT");
 	registerAction(sf::Keyboard::Key::S,			"CROUCH");
@@ -83,7 +84,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 	while (fin >> item)
 	{
-		if (item == "Tile" || item == "Decoration")
+		if (item == "Tile" || item == "Decoration" || item == "Ladder")
 		{
 			
 			int tileGX = 0, tileGY = 0;
@@ -91,7 +92,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 			fin >> name >> tileGX >> tileGY;
 
-			auto tile = m_entityManager.addEntity("Tile");
+			auto tile = m_entityManager.addEntity(item);
 			tile.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			tile.addComponent<CTransform>();
 			tile.addComponent<CDraggable>();
@@ -106,7 +107,16 @@ void Scene_Play::loadLevel(const std::string& filename)
 				tile.addComponent<CBoundingBox>(Vec2(tile.getComponent<CAnimation>().animation.getSize().x, tile.getComponent<CAnimation>().animation.getSize().y));
 				tile.addComponent<CState>("ALIVE");
 			}
+			if (item == "Ladder")
+			{
+				tile.addComponent<CBoundingBox>(Vec2(tile.getComponent<CAnimation>().animation.getSize().x / 2.0f, tile.getComponent<CAnimation>().animation.getSize().y));
+				tile.addComponent<CClimbable>();
+			}
 		}
+		//else if (item == "Ladder")
+		//{
+		//	// Create a CClimbable component to be used here to allow the player to climb up the ladder
+		//}
 		else if (item == "Enemy")
 		{
 			int tileGX = 0, tileGY = 0, damage = 0;
@@ -117,8 +127,9 @@ void Scene_Play::loadLevel(const std::string& filename)
 			auto enemy = m_entityManager.addEntity("Enemy");
 			enemy.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			enemy.addComponent<CTransform>();
-			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
 			enemy.addComponent<CBoundingBox>(Vec2(enemy.getComponent<CAnimation>().animation.getSize().x * 0.85f, enemy.getComponent<CAnimation>().animation.getSize().y * 0.85f));
+			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
+			enemy.getComponent<CTransform>().pos.y += enemy.getComponent<CAnimation>().animation.getSize().y * 0.15f;
 			enemy.addComponent<CState>("ALIVE");
 		}
 		else if (item == "Player")
@@ -272,6 +283,12 @@ void Scene_Play::sStatus()
 				{
 					// TODO
 				}
+				else if (e.getComponent<CState>().state == "CLIMBING")
+				{
+					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerClimb");
+					std::cout << "TEST WORKING" << std::endl;
+				}
 			}
 			else if (e.tag() == "Bullet")
 			{
@@ -296,7 +313,7 @@ void Scene_Play::sStatus()
 
 void Scene_Play::sMovement()
 {
-	if (m_pIsOnGround && !m_player.getComponent<CInput>().up)
+	if (m_pIsOnGround && !m_player.getComponent<CInput>().jump)
 	{
 		m_player.getComponent<CInput>().canJump = true;
 	}
@@ -316,47 +333,56 @@ void Scene_Play::sMovement()
 		{
 			if (e.tag() == "Player")
 			{
-				// SET PLAYER X-VELOCITY
-				if (e.getComponent<CInput>().right || e.getComponent<CInput>().left)
+				// Player is colliding with a climbable object and is holding the "W" key to climb
+				if (e.getComponent<CInput>().canClimb && e.getComponent<CInput>().up)
 				{
-					e.getComponent<CTransform>().velocity.x = e.getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
-					e.getComponent<CTransform>().scale.x = e.getComponent<CInput>().right ? 1 : -1;
-					if (m_pIsOnGround)
-					{
-						e.getComponent<CState>().state = "RUNNING";
-					}
-				}
-				else if (!e.getComponent<CInput>().right && !e.getComponent<CInput>().left)
-				{
-					e.getComponent<CTransform>().velocity.x = 0.0f;
-					if (m_pIsOnGround)
-					{
-						e.getComponent<CState>().state = "IDLE";
-					}
-				}
-
-				// SET PLAYER Y-VELOCITY
-				if (e.getComponent<CInput>().up && e.getComponent<CInput>().canJump && m_pIsOnGround)
-				{
-					e.getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
-					e.getComponent<CState>().state = "JUMPING";
-					e.getComponent<CInput>().canJump = false;
-					m_pIsOnGround = false;
-				}
-				else if (!e.getComponent<CInput>().canJump && !m_pIsOnGround && e.getComponent<CInput>().up)
-				{
-					e.getComponent<CTransform>().velocity.y += e.getComponent<CTransform>().velocity.y + e.getComponent<CGravity>().gravity;
-				}
-				else if (!e.getComponent<CInput>().canJump && !m_pIsOnGround && !e.getComponent<CInput>().up)
-				{
-					e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
+					e.getComponent<CState>().state = "CLIMBING";
+					e.getComponent<CTransform>().velocity.y = -5.0f;
 				}
 				else
 				{
-					e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
-				}
+					// SET PLAYER X-VELOCITY
+					if (e.getComponent<CInput>().right || e.getComponent<CInput>().left)
+					{
+						e.getComponent<CTransform>().velocity.x = e.getComponent<CInput>().right ? m_playerConfig.speedX : -m_playerConfig.speedX;
+						e.getComponent<CTransform>().scale.x = e.getComponent<CInput>().right ? 1 : -1;
+						if (m_pIsOnGround)
+						{
+							e.getComponent<CState>().state = "RUNNING";
+						}
+					}
+					else if (!e.getComponent<CInput>().right && !e.getComponent<CInput>().left)
+					{
+						e.getComponent<CTransform>().velocity.x = 0.0f;
+						if (m_pIsOnGround)
+						{
+							e.getComponent<CState>().state = "IDLE";
+						}
+					}
 
-				e.getComponent<CGravity>().gravity *= 1.1;
+					// SET PLAYER Y-VELOCITY
+					if (e.getComponent<CInput>().jump && e.getComponent<CInput>().canJump && m_pIsOnGround)
+					{
+						e.getComponent<CTransform>().velocity.y = m_playerConfig.speedY;
+						e.getComponent<CState>().state = "JUMPING";
+						e.getComponent<CInput>().canJump = false;
+						m_pIsOnGround = false;
+					}
+					else if (!e.getComponent<CInput>().canJump && !m_pIsOnGround && e.getComponent<CInput>().jump)
+					{
+						e.getComponent<CTransform>().velocity.y += e.getComponent<CTransform>().velocity.y + e.getComponent<CGravity>().gravity;
+					}
+					else if (!e.getComponent<CInput>().canJump && !m_pIsOnGround && !e.getComponent<CInput>().jump)
+					{
+						e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
+					}
+					else
+					{
+						e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
+					}
+
+					e.getComponent<CGravity>().gravity *= 1.1;
+				}
 			}
 			else
 			{
@@ -449,7 +475,22 @@ void Scene_Play::sCollision()
 		}
 	}
 
-	// Not using bounding box here since we want the player to completely exit the screen before we respawn them
+	for (auto e : m_entityManager.getEntities("Ladder"))
+	{
+		overlap = Physics::GetOverlap(m_player, e);
+		if (overlap.x > 0 && overlap.y > 0)
+		{
+			// If our overlap in the x-direction is > 0 for any "Ladder", we can climb - don't loop over the rest of the "Ladders"
+			m_player.getComponent<CInput>().canClimb = true;
+			break;
+		}
+		else
+		{
+			m_player.getComponent<CInput>().canClimb = false;
+		}
+	}
+
+	// Not using bounding box here since we want the player to be off screen before we respawn them
 	if (m_player.getComponent<CTransform>().pos.y > m_game->window().getSize().y + m_player.getComponent<CAnimation>().animation.getSize().y)
 	{
 		m_player.getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player);
@@ -471,7 +512,8 @@ void Scene_Play::sDoAction(const Action& action)
 		if (action.name() == "TOGGLE_GRID")			{ m_drawGrid = !m_drawGrid; }
 		if (action.name() == "PAUSE")				{ setPaused(!m_paused); }
 		if (action.name() == "QUIT")				{ onEnd(); }
-		if (action.name() == "JUMP")				{ m_player.getComponent<CInput>().up = true; }
+		if (action.name() == "CLIMB")				{ m_player.getComponent<CInput>().up = true; }
+		if (action.name() == "JUMP")				{ m_player.getComponent<CInput>().jump = true; }
 		if (action.name() == "CROUCH")				{ m_player.getComponent<CInput>().down = true; }
 		if (action.name() == "LEFT")				{ m_player.getComponent<CInput>().left = true; }
 		if (action.name() == "RIGHT")				{ m_player.getComponent<CInput>().right = true; }
@@ -498,7 +540,8 @@ void Scene_Play::sDoAction(const Action& action)
 	}
 	else if (action.type() == "END")
 	{
-		if (action.name() == "JUMP")				{ m_player.getComponent<CInput>().up = false; }
+		if (action.name() == "CLIMB")				{ m_player.getComponent<CInput>().up = false; }
+		if (action.name() == "JUMP")				{ m_player.getComponent<CInput>().jump = false; }
 		if (action.name() == "CROUCH")				{ m_player.getComponent<CInput>().down = false; }
 		if (action.name() == "LEFT")				{ m_player.getComponent<CInput>().left = false; }
 		if (action.name() == "RIGHT")				{ m_player.getComponent<CInput>().right = false; }
