@@ -129,7 +129,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
 			enemy.getComponent<CTransform>().pos.y += enemy.getComponent<CAnimation>().animation.getSize().y * 0.15f;
 			enemy.addComponent<CState>("ALIVE");
-			enemy.addComponent<CHealth>();
+			enemy.addComponent<CHealth>(50);
 		}
 		else if (item == "Player")
 		{
@@ -183,6 +183,7 @@ void Scene_Play::spawnBullet(Entity entity)
 	bullet.getComponent<CTransform>().velocity.x = bullet.getComponent<CTransform>().scale.x * 15;
 	bullet.addComponent<CAnimation>(m_game->assets().getAnimation("BulletAlive"), true);
 	bullet.addComponent<CBoundingBox>(bullet.getComponent<CAnimation>().animation.getSize() * 0.90f);
+	bullet.addComponent<CDamage>(10);
 	bullet.addComponent<CState>("ALIVE");
 	bullet.addComponent<CLifespan>(600, m_currentFrame);
 }
@@ -475,6 +476,26 @@ void Scene_Play::sCollision()
 		}
 	}
 
+	for (auto b : m_entityManager.getEntities("Bullet"))
+	{
+		for (auto e : m_entityManager.getEntities("Enemy"))
+		{
+			overlap = Physics::GetOverlap(b, e);
+			if ((overlap.x > 0 && overlap.y > 0) && b.getComponent<CState>().state != "DEAD")
+			{
+				b.getComponent<CState>().state = "DEAD";
+				b.destroy();
+				e.getComponent<CHealth>().currentHealth -= b.getComponent<CDamage>().damage;
+
+				if (e.getComponent<CHealth>().currentHealth <= 0)
+				{
+					e.getComponent<CState>().state = "DEAD";
+					e.destroy();
+				}
+			}
+		}
+	}
+
 	for (auto e : m_entityManager.getEntities("Ladder"))
 	{
 		overlap = Physics::GetOverlap(m_player, e);
@@ -553,6 +574,32 @@ void Scene_Play::sDoAction(const Action& action)
 	}
 }
 
+void Scene_Play::sDisplayHealth()
+{
+	for (auto e : m_entityManager.getEntities())
+	{
+		if (e.hasComponent<CHealth>())
+		{
+			if (e.getComponent<CHealth>().currentHealth < e.getComponent<CHealth>().maxHealth && e.getComponent<CState>().state != "DEAD")
+			{
+				auto entTrans = e.getComponent<CTransform>();
+				auto entSize = e.getComponent<CAnimation>().animation.getSize();
+				auto rectBack = sf::RectangleShape({ entSize.x, entSize.y / 5.0f });
+				rectBack.setFillColor(sf::Color::Red);
+				// set the position to the middle of the entity (x) and slightly above the entity (-10)
+				rectBack.setPosition({ entTrans.pos.x - (entSize.x / 2), entTrans.pos.y - (entSize.y / 2) - 10});
+
+				auto rectFront = sf::RectangleShape({ entSize.x * (e.getComponent<CHealth>().currentHealth / e.getComponent<CHealth>().maxHealth), entSize.y / 5.0f });
+				rectFront.setFillColor(sf::Color::Green);
+				rectFront.setPosition({ rectBack.getPosition().x, rectBack.getPosition().y });
+
+				m_game->window().draw(rectBack);
+				m_game->window().draw(rectFront);
+			}
+		}
+	}
+}
+
 void Scene_Play::sAnimation()
 {
 	for (auto e : m_entityManager.getEntities())
@@ -600,6 +647,8 @@ void Scene_Play::sRender()
 				m_game->window().draw(animation.getSprite());
 			}
 		}
+
+		sDisplayHealth();
 	}
 
 	// Draw all Entity collision bounding boxes with a rectangleShape

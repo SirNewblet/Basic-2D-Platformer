@@ -45,6 +45,7 @@ protected:
 	void sMovement();
 	void sStatus();
 	void sAnimation();
+	void sDisplayHealth();
 	void sCollision();
 	void sLifespan();
 	void sCamera();

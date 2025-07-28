@@ -12,6 +12,7 @@ typedef std::tuple<
 	std::vector<CAnimation>,
 	std::vector<CBoundingBox>,
 	std::vector<CClimbable>,
+	std::vector<CDamage>,
 	std::vector<CDraggable>,
 	std::vector<CGravity>,
 	std::vector<CHealth>,
