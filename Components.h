@@ -36,6 +36,14 @@ public:
 	CClimbable() {};
 };
 
+class CDamage : public Component
+{
+public:
+	float damage = 0;
+	CDamage() {};
+	CDamage(float d) : damage(d) {};
+};
+
 class CDraggable : public Component
 {
 public:
@@ -58,6 +66,10 @@ public:
 	float currentHealth = 100;
 
 	CHealth() {};
+	CHealth(float mh) :
+		maxHealth(mh),
+		currentHealth(mh)
+	{ };
 };
 
 class CInput : public Component
