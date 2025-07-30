@@ -142,6 +142,7 @@
     <ClCompile Include="MemoryMapping.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Scene_LevelEditor.cpp" />
     <ClCompile Include="Scene_Menu.cpp" />
     <ClCompile Include="Scene_Play.cpp" />
     <ClCompile Include="Vec2.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Profiler.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Scene_LevelEditor.h" />
     <ClInclude Include="Scene_Menu.h" />
     <ClInclude Include="Scene_Play.h" />
     <ClInclude Include="Vec2.h" />
