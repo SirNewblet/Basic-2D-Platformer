@@ -50,6 +50,8 @@ Here are some of the highlights of the game:
 ### Jira
 [Jira](https://sirnewblet.atlassian.net/jira/software/projects/SAD/boards/1)
 
+<img width="1138" height="960" alt="2D_Platformer_Kanban_Jira_Board" src="https://github.com/user-attachments/assets/ed33ec47-fe2b-4dd0-918c-ba956cf93f49" />
+
 ### 🎬 Gameplay
 
 ![Gameplay](media/gameplay.gif)
