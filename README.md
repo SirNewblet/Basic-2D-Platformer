@@ -39,12 +39,16 @@ Here are some of the highlights of the game:
 - ✅ Audio with SFML Sound & Music
 - ✅ Entity-Component-System (ECS) architecture for modularity
 - ✅ Entity-Component Memory Pooling to take advantage of cache-coherency
+- ✅ Kanban (Jira) for project management
 
 ---
 
 ## 📸 Screenshots & GIFs
 
 > Store your media in a `/media/` folder or link to hosted images. (TODO)
+
+### Jira
+[Jira](https://sirnewblet.atlassian.net/jira/software/projects/SAD/boards/1)
 
 ### 🎬 Gameplay
 
