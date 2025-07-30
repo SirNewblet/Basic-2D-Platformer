@@ -28,7 +28,8 @@ protected:
 	Vec2								m_mPos;
 	sf::CircleShape						m_mouseShape;
 
-	Vec2 gridToMidPixel(float gridX, float gridY, Entity);
+	Vec2 gridToMidPixel(float gridX, float gridY, Entity e);
+	Vec2 mouseToGrid(Vec2 m_mPos, Entity e);
 	Vec2 windowToWorld(const Vec2& windowPos) const;
 
 	void init(const std::string& levelPath);

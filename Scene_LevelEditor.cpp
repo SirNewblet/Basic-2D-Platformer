@@ -8,20 +8,11 @@
 #include <iostream>
 #include <fstream>
 
-bool isInside(Vec2 pos, Entity e)
-{
-	auto ePos = e.getComponent<CTransform>().pos;
-	auto size = e.getComponent<CAnimation>().animation.getSize();
-	float dx = fabs(pos.x - ePos.x);
-	float dy = fabs(pos.y - ePos.y);
-
-	return ((dx <= size.x / 2) && (dy <= size.y / 2));
-}
-
 Scene_LevelEditor::Scene_LevelEditor(GameEngine* gameEngine, const std::string& levelPath) :
 	Scene(gameEngine),
 	m_levelPath(levelPath),
-	m_gridText(m_game->assets().getFont("Sooky"))
+	m_gridText(m_game->assets().getFont("Sooky")),
+	m_player(m_entityManager.addEntity("Default"))
 {
 	init(m_levelPath);
 }
@@ -29,7 +20,7 @@ Scene_LevelEditor::Scene_LevelEditor(GameEngine* gameEngine, const std::string& 
 void Scene_LevelEditor::init(const std::string& levelPath)
 {
 	registerAction(sf::Keyboard::Key::Escape, "QUIT");
-	registerAction(sf::Keyboard::Key::T, "TOGGLE_TEXTURE");				// Toggle drawing (T)extures
+	registerAction(sf::Keyboard::Key::T, "TOGGLE_TEXTURE");					// Toggle drawing (T)extures
 	registerAction(sf::Keyboard::Key::G, "TOGGLE_GRID");					// Toggle drawing (G)rid
 
 	registerAction(sf::Keyboard::Key::Space, "ASCEND");
@@ -56,6 +47,15 @@ Vec2 Scene_LevelEditor::gridToMidPixel(float gridX, float gridY, Entity entity)
 	y = m_game->window().getSize().y - (gridY * m_gridSize.y) - (entity.getComponent<CAnimation>().animation.getSize().y / 2 * entity.getComponent<CTransform>().scale.y);
 
 	return Vec2(x, y);
+}
+
+Vec2 Scene_LevelEditor::mouseToGrid(Vec2 mousePos, Entity entity)
+{
+	Vec2 gridLoc;
+	gridLoc.x = int(mousePos.x / m_gridSize.x);
+	gridLoc.y = int((m_game->window().getSize().y - mousePos.y) / m_gridSize.y);
+
+	return gridLoc;
 }
 
 Vec2 Scene_LevelEditor::windowToWorld(const Vec2& windowPos) const
@@ -89,8 +89,9 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 			auto entity = m_entityManager.addEntity(item);
 			entity.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			entity.addComponent<CTransform>();
-			entity.addComponent<CDraggable>();
 			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, entity);
+			entity.addComponent<CDraggable>();
+			entity.addComponent<CGridLocation>(tileGX, tileGY);
 		}
 		else if (item == "Enemy")
 		{
@@ -102,8 +103,9 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 			auto entity = m_entityManager.addEntity(item);
 			entity.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			entity.addComponent<CTransform>();
+			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, entity);
 			entity.addComponent<CDraggable>();
-			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
+			entity.addComponent<CGridLocation>(tileGX, tileGY);
 		}
 		else if (item == "Player")
 		{
@@ -141,10 +143,10 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 void Scene_LevelEditor::spawnPlayer()
 {
 	m_player = m_entityManager.addEntity("Player");
-	m_player.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerStand"), true);
+	m_player.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerIdle"), true);
 	m_player.addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
+	m_player.addComponent<CGridLocation>(m_playerConfig.gridX, m_playerConfig.gridY);
 	m_player.addComponent<CDraggable>();
-	m_player.addComponent<CHealth>();
 }
 
 void Scene_LevelEditor::update()
@@ -207,13 +209,15 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 			//std::cout << "Mouse clicked at: " << worldPos.x << ", " << worldPos.y << std::endl;
 			for (auto e : m_entityManager.getEntities())
 			{
-				if (e.hasComponent<CDraggable>() && isInside(worldPos, e))
+				if (e.hasComponent<CDraggable>() && Physics::IsInside(worldPos, e))
 				{
 					std::cout << "CLICKED ON ENTITY: " << e.getComponent<CAnimation>().animation.getName() << std::endl;
 					e.getComponent<CDraggable>().dragging = !e.getComponent<CDraggable>().dragging;
 					if (!e.getComponent<CDraggable>().dragging)
 					{
-						// put entity into the correct grid location
+						// put entity into the correct grid location (snapping)
+						Vec2 gridLocation = mouseToGrid(worldPos, e);
+						e.getComponent<CTransform>().pos = gridToMidPixel(gridLocation.x, gridLocation.y, e);
 						 
 					}
 				}
