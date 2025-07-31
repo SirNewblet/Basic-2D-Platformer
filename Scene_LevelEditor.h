@@ -20,6 +20,7 @@ protected:
 	PlayerConfig						m_playerConfig;
 	std::string							m_levelPath;
 	std::string							m_lastAction;
+	std::string							m_filename;
 	bool								m_drawTextures = true;
 	bool								m_drawGrid = false;
 	const Vec2							m_gridSize = { 64, 64 };
@@ -34,6 +35,7 @@ protected:
 
 	void init(const std::string& levelPath);
 	void loadLevel(const std::string& filename);
+	bool saveLevel(const std::string& filename);
 	void onEnd();
 	void update();
 

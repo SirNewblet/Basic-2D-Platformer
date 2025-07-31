@@ -28,6 +28,8 @@ void Scene_LevelEditor::init(const std::string& levelPath)
 	registerAction(sf::Keyboard::Key::D, "RIGHT");
 	registerAction(sf::Keyboard::Key::S, "DESCEND");
 
+	registerAction(sf::Keyboard::Key::Y, "SAVE");
+
 	m_gridText.setCharacterSize(24);
 
 	loadLevel(levelPath);
@@ -70,6 +72,9 @@ Vec2 Scene_LevelEditor::windowToWorld(const Vec2& windowPos) const
 
 void Scene_LevelEditor::loadLevel(const std::string& filename)
 {
+	// store the file name so we can use it again when we save
+	m_filename = filename;
+
 	// Reset the entity manager every time we load a level
 	m_entityManager = EntityManager();
 
@@ -140,6 +145,57 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 	//		auto& transform2 = entity->get<CTransform>()
 }
 
+bool Scene_LevelEditor::saveLevel(const std::string& levelPath)
+{
+	// first, copy the level as a backup incase saving/writing to the file fails, which could potentially
+	// corrupt our file and we'd lose X amount of work on the level
+	//std::ifstream 
+
+	try
+	{
+		std::cout << "Attempting to save level...\n";
+		std::ofstream fout(levelPath);
+
+		if (fout.is_open())
+		{
+			for (auto e : m_entityManager.getEntities())
+			{
+				if (e.tag() == "Player")
+				{
+
+				}
+				if (e.tag() == "Enemy")
+				{
+
+				}
+				if (e.tag() == "Tile")
+				{
+
+				}
+				if (e.tag() == "Decoration")
+				{
+
+				}
+				if (e.tag() == "Ladder")
+				{
+
+				}
+			}
+		}
+		else
+		{
+			std::cout << "File failed to open. No exception was thrown.\n";
+		}
+	}
+	catch (std::exception e)
+	{
+		std::cout << "File failed to save with ex: " << e.what() << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 void Scene_LevelEditor::spawnPlayer()
 {
 	m_player = m_entityManager.addEntity("Player");
@@ -199,6 +255,7 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 		if (action.name() == "TOGGLE_TEXTURE") { m_drawTextures = !m_drawTextures; }
 		if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
 		if (action.name() == "QUIT") { onEnd(); }
+		if (action.name() == "SAVE") { saveLevel(m_filename); }
 		if (action.name() == "JUMP") { m_player.getComponent<CInput>().jump = true; }
 		if (action.name() == "CROUCH") { m_player.getComponent<CInput>().down = true; }
 		if (action.name() == "LEFT") { m_player.getComponent<CInput>().left = true; }
