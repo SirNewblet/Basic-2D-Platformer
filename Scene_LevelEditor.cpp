@@ -107,6 +107,7 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 
 			auto entity = m_entityManager.addEntity(item);
 			entity.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
+			entity.addComponent<CDamage>(damage);
 			entity.addComponent<CTransform>();
 			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, entity);
 			entity.addComponent<CDraggable>();
@@ -147,14 +148,34 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 
 bool Scene_LevelEditor::saveLevel(const std::string& levelPath)
 {
-	// first, copy the level as a backup incase saving/writing to the file fails, which could potentially
-	// corrupt our file and we'd lose X amount of work on the level
-	//std::ifstream 
 
 	try
 	{
+		// first, copy the level as a backup incase saving/writing to the file fails, which could potentially
+		// corrupt our file and we'd lose X amount of work on the level
+		std::cout << "Attempting to create a copy of the pre-existing version...\n";
+		std::string copyPath = levelPath;
+		char target = '.';
+		size_t pos = levelPath.find(target);
+		if (pos != std::string::npos) {
+			// Character found, proceed with insertion
+			copyPath.insert(pos, "_COPY");
+		}
+		else 
+		{
+			std::cout << "Character not found." << std::endl;
+			return false;
+		}
+		std::ifstream source(levelPath, std::ios::binary);
+		std::ofstream copy(copyPath, std::ios::binary);
+		copy << source.rdbuf();
+		source.close();
+		copy.close();
+
+		std::cout << "Copy of level successfully saved!\n";
+
 		std::cout << "Attempting to save level...\n";
-		std::ofstream fout(levelPath);
+		std::ofstream fout(levelPath, std::ios::trunc);
 
 		if (fout.is_open())
 		{
@@ -162,25 +183,41 @@ bool Scene_LevelEditor::saveLevel(const std::string& levelPath)
 			{
 				if (e.tag() == "Player")
 				{
-
+					fout <<
+						e.tag() << " " <<
+						e.getComponent<CGridLocation>().x << " " <<
+						e.getComponent<CGridLocation>().y << " " <<
+						m_playerConfig.collisionX << " " <<
+						m_playerConfig.collisionY << " " <<
+						m_playerConfig.speedX << " " <<
+						m_playerConfig.speedY << " " <<
+						m_playerConfig.maxSpeed << " " <<
+						m_playerConfig.gravity << " " <<
+						m_playerConfig.WEAPON << " \n";
 				}
 				if (e.tag() == "Enemy")
 				{
+					fout << 
+						e.tag() << " " << 
+						e.getComponent<CAnimation>().animation.getName() << " " << 
+						e.getComponent<CGridLocation>().x << " " << 
+						e.getComponent<CGridLocation>().y << " " <<
+						int(e.getComponent<CDamage>().damage) << " \n";
 
 				}
-				if (e.tag() == "Tile")
+				if (e.tag() == "Tile" || e.tag() == "Decoration" || e.tag() == "Ladder")
 				{
-
-				}
-				if (e.tag() == "Decoration")
-				{
-
-				}
-				if (e.tag() == "Ladder")
-				{
-
+					fout << 
+						e.tag() << " " << 
+						e.getComponent<CAnimation>().animation.getName() << " " << 
+						e.getComponent<CGridLocation>().x << " " << 
+						e.getComponent<CGridLocation>().y << " \n";
 				}
 			}
+
+			fout.close();
+			std::cout << "LEVEL SAVED SUCCESSFULLY!\n";
+			m_canSave = true;
 		}
 		else
 		{
@@ -255,7 +292,7 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 		if (action.name() == "TOGGLE_TEXTURE") { m_drawTextures = !m_drawTextures; }
 		if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
 		if (action.name() == "QUIT") { onEnd(); }
-		if (action.name() == "SAVE") { saveLevel(m_filename); }
+		if (action.name() == "SAVE" && m_canSave) { m_canSave = false; saveLevel(m_filename); }
 		if (action.name() == "JUMP") { m_player.getComponent<CInput>().jump = true; }
 		if (action.name() == "CROUCH") { m_player.getComponent<CInput>().down = true; }
 		if (action.name() == "LEFT") { m_player.getComponent<CInput>().left = true; }
@@ -274,6 +311,8 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 					{
 						// put entity into the correct grid location (snapping)
 						Vec2 gridLocation = mouseToGrid(worldPos, e);
+						e.getComponent<CGridLocation>().x = gridLocation.x;
+						e.getComponent<CGridLocation>().y = gridLocation.y;
 						e.getComponent<CTransform>().pos = gridToMidPixel(gridLocation.x, gridLocation.y, e);
 						 
 					}

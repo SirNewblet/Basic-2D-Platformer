@@ -21,6 +21,7 @@ protected:
 	std::string							m_levelPath;
 	std::string							m_lastAction;
 	std::string							m_filename;
+	bool								m_canSave = true;
 	bool								m_drawTextures = true;
 	bool								m_drawGrid = false;
 	const Vec2							m_gridSize = { 64, 64 };
