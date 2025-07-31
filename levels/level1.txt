@@ -13,7 +13,10 @@ Tile Ground 11 0
 Decoration NonEnemyTree 11 1
 Tile Ground 12 0
 Tile Ground 13 0
-Tile Ground 13 4
+Tile GroundPurple 13 1
+Tile GroundPurple 13 2
+Tile GroundPurple 13 3
+Tile GroundPurple 13 4
 Tile Ground 14 0
 Tile Ground 15 0
 Tile Ground 16 0
