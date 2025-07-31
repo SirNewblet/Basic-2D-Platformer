@@ -23,10 +23,10 @@ void Scene_LevelEditor::init(const std::string& levelPath)
 	registerAction(sf::Keyboard::Key::T, "TOGGLE_TEXTURE");					// Toggle drawing (T)extures
 	registerAction(sf::Keyboard::Key::G, "TOGGLE_GRID");					// Toggle drawing (G)rid
 
-	registerAction(sf::Keyboard::Key::Space, "ASCEND");
+	registerAction(sf::Keyboard::Key::W, "UP");
 	registerAction(sf::Keyboard::Key::A, "LEFT");
+	registerAction(sf::Keyboard::Key::S, "DOWN");
 	registerAction(sf::Keyboard::Key::D, "RIGHT");
-	registerAction(sf::Keyboard::Key::S, "DESCEND");
 
 	registerAction(sf::Keyboard::Key::Y, "SAVE");
 
@@ -279,7 +279,7 @@ void Scene_LevelEditor::sMovement()
 {
 	int speed = 10;
 	Vec2 vel = { 0, 0 };
-	if (m_player.getComponent<CInput>().jump)
+	if (m_player.getComponent<CInput>().up)
 	{
 		vel.y = -speed;
 	}
@@ -308,8 +308,8 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 		if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
 		if (action.name() == "QUIT") { onEnd(); }
 		if (action.name() == "SAVE" && m_canSave) { m_canSave = false; saveLevel(m_filename); }
-		if (action.name() == "JUMP") { m_player.getComponent<CInput>().jump = true; }
-		if (action.name() == "CROUCH") { m_player.getComponent<CInput>().down = true; }
+		if (action.name() == "UP") { m_player.getComponent<CInput>().up = true; }
+		if (action.name() == "DOWN") { m_player.getComponent<CInput>().down = true; }
 		if (action.name() == "LEFT") { m_player.getComponent<CInput>().left = true; }
 		if (action.name() == "RIGHT") { m_player.getComponent<CInput>().right = true; }
 		if (action.name() == "LEFT_CLICK")
@@ -342,9 +342,8 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 	}
 	else if (action.type() == "END")
 	{
-		if (action.name() == "CLIMB") { m_player.getComponent<CInput>().up = false; }
-		if (action.name() == "JUMP") { m_player.getComponent<CInput>().jump = false; }
-		if (action.name() == "CROUCH") { m_player.getComponent<CInput>().down = false; }
+		if (action.name() == "UP") { m_player.getComponent<CInput>().up = false; }
+		if (action.name() == "DOWN") { m_player.getComponent<CInput>().down = false; }
 		if (action.name() == "LEFT") { m_player.getComponent<CInput>().left = false; }
 		if (action.name() == "RIGHT") { m_player.getComponent<CInput>().right = false; }
 	}
