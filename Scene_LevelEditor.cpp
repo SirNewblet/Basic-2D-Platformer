@@ -240,6 +240,7 @@ void Scene_LevelEditor::spawnPlayer()
 	m_player.addComponent<CTransform>(Vec2(gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player)));
 	m_player.addComponent<CGridLocation>(m_playerConfig.gridX, m_playerConfig.gridY);
 	m_player.addComponent<CDraggable>();
+	m_camPos = { float(m_game->window().getSize().x / 2), float(m_game->window().getSize().y / 2) };
 }
 
 void Scene_LevelEditor::update()
@@ -268,20 +269,34 @@ void Scene_LevelEditor::sDragAndDrop()
 
 void Scene_LevelEditor::sCamera()
 {
-	// TODO: Keep Camera on player unless player runs left / falls down a hole / enters a gate
-	// Set the viewport of the window to be centered on the player if it's far enough right
-	auto& pPos = m_player.getComponent<CTransform>().pos;
-	float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, pPos.x);
-	float windowCenterY = std::min(m_game->window().getSize().y / 2.0f, pPos.y);
+	// Camera in the Level Editor should be controllable
 	sf::View view = m_game->window().getView();
-	view.setCenter({ windowCenterX, windowCenterY });
+	view.setCenter({ m_camPos.x, m_camPos.y });
 	m_game->window().setView(view);
 }
 
 void Scene_LevelEditor::sMovement()
 {
+	int speed = 10;
+	Vec2 vel = { 0, 0 };
+	if (m_player.getComponent<CInput>().jump)
+	{
+		vel.y = -speed;
+	}
+	if (m_player.getComponent<CInput>().down)
+	{
+		vel.y = speed;
+	}
+	if (m_player.getComponent<CInput>().right)
+	{
+		vel.x = speed;
+	}
+	if (m_player.getComponent<CInput>().left)
+	{
+		vel.x = -speed;
+	}
 
-
+	m_camPos += vel;
 }
 
 void Scene_LevelEditor::sDoAction(const Action& action)

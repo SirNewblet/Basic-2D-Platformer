@@ -10,7 +10,7 @@ Tile Ground 8 0
 Tile Ground 9 0 
 Tile Ground 10 0 
 Tile Ground 14 2 
-Decoration NonEnemyTree 10 7 
+Decoration NonEnemyTree 4 1 
 Tile Ground 13 3 
 Tile Ground 17 1 
 Tile GroundPurple 10 6 
@@ -21,19 +21,19 @@ Tile Ground 11 1
 Tile Ground 12 2 
 Tile Ground 15 1 
 Tile Ground 16 1 
-Enemy EnemyRunner 17 2 10 
+Enemy EnemyRunner 16 2 10 
 Tile Ground 18 0 
 Tile Ground 19 0 
-Enemy EnemyRunner 13 4 10 
+Enemy EnemyRunner 10 1 10 
 Tile Ground 20 0 
 Tile Ground 21 0 
 Tile Ground 22 0 
 Tile Ground 23 0 
-Ladder LadderBone 23 1 
-Ladder LadderBone 23 2 
-Ladder LadderBone 23 3 
-Ladder LadderBone 23 4 
-Ladder LadderBone 23 5 
+Ladder LadderBone 26 2 
+Ladder LadderBone 26 1 
+Ladder LadderBone 13 6 
+Ladder LadderBone 13 5 
+Ladder LadderBone 13 4 
 Tile Ground 24 0 
 Tile Ground 25 0 
 Tile Ground 26 0 
@@ -54,4 +54,4 @@ Tile Ground 39 0
 Tile Ground 39 1 
 Tile Ground 39 2 
 Tile Ground 39 3 
-Player 2 3 48 48 8 -10 15 2 GUN 
+Player 2 6 48 48 8 -10 15 2 GUN 

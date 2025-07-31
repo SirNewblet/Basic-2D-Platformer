@@ -27,6 +27,7 @@ protected:
 	const Vec2							m_gridSize = { 64, 64 };
 	sf::Text							m_gridText;
 
+	Vec2								m_camPos;
 	Vec2								m_mPos;
 	sf::CircleShape						m_mouseShape;
 
