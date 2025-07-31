@@ -3,6 +3,7 @@
 #include "GameEngine.h"
 
 #include <iostream>
+#include "Scene_LevelEditor.h"
 
 Scene_Menu::Scene_Menu(GameEngine* gameEngine) : 
 	Scene(gameEngine),
@@ -21,6 +22,7 @@ void Scene_Menu::init()
 	m_menuStrings.push_back("Start");
 	m_menuStrings.push_back("Quit");
 	m_menuStrings.push_back("Options");
+	m_menuStrings.push_back("Editor");
 
 	sf::Text upText(m_menuFont, "UP: W", 40);
 	sf::Text downText(m_menuFont, "DOWN: S", 40);
@@ -31,6 +33,9 @@ void Scene_Menu::init()
 	m_displayStrings.push_back(playText);
 	m_displayStrings.push_back(backText);
 
+	m_levelPaths.push_back("levels/level1.txt");
+	m_levelPaths.push_back("levels/level1.txt");
+	m_levelPaths.push_back("levels/level1.txt");
 	m_levelPaths.push_back("levels/level1.txt");
 
 	auto menuCharacter = m_entityManager.addEntity("Tile");
@@ -69,6 +74,10 @@ void Scene_Menu::sDoAction(const Action& action)
 			if (m_menuStrings[m_selectedMenuIndex] == "Start")
 			{
 				m_game->changeScene("PLAY", std::make_shared<Scene_Play>(m_game, m_levelPaths[m_selectedMenuIndex]));
+			}
+			if (m_menuStrings[m_selectedMenuIndex] == "Editor")
+			{
+				m_game->changeScene("EDIT", std::make_shared<Scene_LevelEditor>(m_game, m_levelPaths[m_selectedMenuIndex]));
 			}
 		}
 		else if (action.name() == "UP")

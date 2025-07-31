@@ -59,6 +59,16 @@ public:
 	CGravity(float g) : gravity(g) {}
 };
 
+class CGridLocation : public Component
+{
+public:
+	int x = 0, y = 0;
+	CGridLocation() {};
+	CGridLocation(int gridX, int gridY) :
+		x(gridX), y(gridY) 
+	{ };
+};
+
 class CHealth : public Component
 {
 public:

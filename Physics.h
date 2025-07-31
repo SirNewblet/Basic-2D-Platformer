@@ -14,6 +14,7 @@ public:
 
 	Physics() {}
 
+	bool static IsInside(Vec2& pos, Entity e);
 	Vec2 static GetOverlap(Entity a, Entity b);
 	Vec2 static GetPreviousOverlap(Entity a, Entity b);
 	bool static IsInside(const Vec2& pos, Entity e);

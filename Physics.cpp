@@ -1,5 +1,15 @@
 #include "Physics.h"
 
+bool Physics::IsInside(Vec2& pos, Entity e)
+{
+	auto ePos = e.getComponent<CTransform>().pos;
+	auto size = e.getComponent<CAnimation>().animation.getSize();
+	float dx = fabs(pos.x - ePos.x);
+	float dy = fabs(pos.y - ePos.y);
+
+	return ((dx <= size.x / 2) && (dy <= size.y / 2));
+}
+
 Vec2 Physics::GetOverlap(Entity a, Entity b)
 {
 	if (a.hasComponent<CBoundingBox>() && b.hasComponent<CBoundingBox>())
