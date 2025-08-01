@@ -129,6 +129,7 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 	}
 
 	spawnPlayer();
+	spawnPoolBackground(m_poolBackground);
 
 
 	//      NOTE:
@@ -146,7 +147,7 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 	//		auto& transform2 = entity->get<CTransform>()
 }
 
-bool Scene_LevelEditor::saveLevel(const std::string& levelPath)
+void Scene_LevelEditor::saveLevel(const std::string& levelPath)
 {
 
 	try
@@ -164,7 +165,6 @@ bool Scene_LevelEditor::saveLevel(const std::string& levelPath)
 		else 
 		{
 			std::cout << "Character not found." << std::endl;
-			return false;
 		}
 		std::ifstream source(levelPath, std::ios::binary);
 		std::ofstream copy(copyPath, std::ios::binary);
@@ -227,10 +227,39 @@ bool Scene_LevelEditor::saveLevel(const std::string& levelPath)
 	catch (std::exception e)
 	{
 		std::cout << "File failed to save with ex: " << e.what() << std::endl;
-		return false;
 	}
+}
 
-	return true;
+void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
+{
+	std::ifstream fin(tilesheet);
+	if (fin.is_open())
+	{
+		std::string item = "";
+		while (fin >> item)
+		{
+			m_tileSheet.push_back(item);
+		}
+
+		for (auto e : m_tileSheet)
+		{
+			sf::Sprite sprite = m_game->assets().getAnimation(e).getSprite();
+			m_spriteSheet.push_back(std::make_shared<sprite>);
+		}
+	}
+	else
+	{
+		std::cout << "Failed to open and read list of tiles...\n";
+	}
+}
+
+void Scene_LevelEditor::spawnPoolBackground(sf::RectangleShape& background)
+{
+	background = sf::RectangleShape({ 256, m_game->window().getSize().y });
+	background.setFillColor(sf::Color::Yellow);
+	background.setOutlineColor(sf::Color::Black);
+	background.setOutlineThickness(3);
+	background.setPosition({ 0, 0});
 }
 
 void Scene_LevelEditor::spawnPlayer()
@@ -252,8 +281,46 @@ void Scene_LevelEditor::update()
 	sMovement();
 	sCamera();
 	sRender();
+	sTilePool();
 
 	m_currentFrame++;
+}
+
+void Scene_LevelEditor::sTilePool()
+{
+	float relativeX = m_game->window().getView().getCenter().x + (m_game->window().getSize().x / 2) - 256;
+	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getSize().y / 2);
+	int row = 0;
+	int column = 0;
+	int tilePerRow = 3;
+	int counterX = 1;
+	int counterY = 1;
+	int buffer = 16;
+
+	for (auto s : m_spriteSheet)
+	{
+		float xLoc = relativeX + (row * m_gridSize.x) + (counterX * buffer);
+		float yLoc = column * m_gridSize.y + (counterY * buffer);
+		s.setPosition({ xLoc, 0.0f });
+		m_game->window().draw(s);
+
+
+		if (counterX % tilePerRow == 0)
+		{
+			counterX = 1;
+		}
+		if (counterY % tilePerRow == 0)
+		{
+			counterY++;
+		}
+
+		column++;
+		if (column > 3)
+		{
+			column = 1;
+			row++;
+		}
+	}
 }
 
 void Scene_LevelEditor::sDragAndDrop()
@@ -338,6 +405,17 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 		{
 			m_mPos = action.pos();
 			m_mouseShape.setPosition({ m_mPos.x, m_mPos.y });
+		}
+		if (action.name() == "RIGHT_CLICK")
+		{
+			Vec2 worldPos = windowToWorld(action.pos());
+			for (auto e : m_entityManager.getEntities())
+			{
+				if (Physics::IsInside(worldPos, e))
+				{
+					e.destroy();
+				}
+			}
 		}
 	}
 	else if (action.type() == "END")

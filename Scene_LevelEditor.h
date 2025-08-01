@@ -30,6 +30,10 @@ protected:
 	Vec2								m_camPos;
 	Vec2								m_mPos;
 	sf::CircleShape						m_mouseShape;
+	sf::RectangleShape					m_poolBackground;
+
+	std::vector<std::string>			m_tileSheet;
+	std::vector<std::shared_ptr<sf::Sprite>> m_spriteSheet;
 
 	Vec2 gridToMidPixel(float gridX, float gridY, Entity e);
 	Vec2 mouseToGrid(Vec2 m_mPos, Entity e);
@@ -37,15 +41,18 @@ protected:
 
 	void init(const std::string& levelPath);
 	void loadLevel(const std::string& filename);
-	bool saveLevel(const std::string& filename);
+	void saveLevel(const std::string& filename);
+	void loadTileSheet(const std::string& tilesheet);
 	void onEnd();
 	void update();
 
+	void spawnPoolBackground(sf::RectangleShape& bg);
 	void spawnPlayer();
 	void spawnBullet(Entity entity);
 
 	void sDragAndDrop();
 	void sMovement();
+	void sTilePool();
 	void sDoAction(const Action& action);
 	void sCamera();
 
