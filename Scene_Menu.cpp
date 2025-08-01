@@ -34,9 +34,10 @@ void Scene_Menu::init()
 	m_displayStrings.push_back(backText);
 
 	m_levelPaths.push_back("levels/level1.txt");
-	m_levelPaths.push_back("levels/level1.txt");
-	m_levelPaths.push_back("levels/level1.txt");
-	m_levelPaths.push_back("levels/level1.txt");
+	m_levelPaths.push_back("levels/level2.txt");
+	m_levelPaths.push_back("levels/level3.txt");
+	m_levelPaths.push_back("levels/level4.txt");
+	m_levelPaths.push_back("levels/level5.txt");
 
 	auto menuCharacter = m_entityManager.addEntity("Tile");
 	menuCharacter.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerRun"), true);

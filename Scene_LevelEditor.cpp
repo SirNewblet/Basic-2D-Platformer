@@ -130,6 +130,7 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 
 	spawnPlayer();
 	spawnPoolBackground(m_poolBackground);
+	loadTileSheet("level_tilesheets/level1.txt");
 
 
 	//      NOTE:
@@ -243,8 +244,8 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 
 		for (auto e : m_tileSheet)
 		{
-			sf::Sprite sprite = m_game->assets().getAnimation(e).getSprite();
-			m_spriteSheet.push_back(std::make_shared<sprite>);
+			//sf::Sprite sprite = m_game->assets().getAnimation(e).getSprite();
+			m_spriteSheet->push_back(m_game->assets().getAnimation(e).getSprite());
 		}
 	}
 	else
@@ -255,8 +256,8 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 
 void Scene_LevelEditor::spawnPoolBackground(sf::RectangleShape& background)
 {
-	background = sf::RectangleShape({ 256, m_game->window().getSize().y });
-	background.setFillColor(sf::Color::Yellow);
+	background = sf::RectangleShape({ 256.0f, float(m_game->window().getView().getSize().y /*- 20*/)});
+	background.setFillColor(sf::Color::Red);
 	background.setOutlineColor(sf::Color::Black);
 	background.setOutlineThickness(3);
 	background.setPosition({ 0, 0});
@@ -281,7 +282,6 @@ void Scene_LevelEditor::update()
 	sMovement();
 	sCamera();
 	sRender();
-	sTilePool();
 
 	m_currentFrame++;
 }
@@ -289,36 +289,31 @@ void Scene_LevelEditor::update()
 void Scene_LevelEditor::sTilePool()
 {
 	float relativeX = m_game->window().getView().getCenter().x + (m_game->window().getSize().x / 2) - 256;
-	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getSize().y / 2);
-	int row = 0;
-	int column = 0;
+	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getSize().y / 2)/* + 10*/;
+	m_poolBackground.setPosition({ relativeX, relativeY });
+	m_game->window().draw(m_poolBackground);
+	int currentRow = 1;
+	int currentCol = 1;
+	int tileXCount = 0;
+	int tileYCount = 0;
 	int tilePerRow = 3;
-	int counterX = 1;
-	int counterY = 1;
 	int buffer = 16;
 
-	for (auto s : m_spriteSheet)
+	for (sf::Sprite s : *m_spriteSheet)
 	{
-		float xLoc = relativeX + (row * m_gridSize.x) + (counterX * buffer);
-		float yLoc = column * m_gridSize.y + (counterY * buffer);
-		s.setPosition({ xLoc, 0.0f });
+		float xLoc = relativeX + (currentCol * buffer) + (tileXCount * m_gridSize.x);
+		tileXCount++;
+		currentCol++;
+		float yLoc = relativeY + (currentRow * buffer) + (tileYCount * m_gridSize.y);
+		s.setPosition({ xLoc, yLoc });
 		m_game->window().draw(s);
 
-
-		if (counterX % tilePerRow == 0)
+		// we have 3 tiles on this row, make a new row
+		if (tileXCount >= tilePerRow)
 		{
-			counterX = 1;
-		}
-		if (counterY % tilePerRow == 0)
-		{
-			counterY++;
-		}
-
-		column++;
-		if (column > 3)
-		{
-			column = 1;
-			row++;
+			tileXCount = 0;
+			currentRow++;
+			tileYCount++;
 		}
 	}
 }
@@ -449,6 +444,8 @@ void Scene_LevelEditor::sRender()
 				m_game->window().draw(animation.getSprite());
 			}
 		}
+
+		sTilePool();
 	}
 
 	// Draw the grid so that students can easily debug
