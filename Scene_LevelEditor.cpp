@@ -244,7 +244,6 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 
 		for (auto e : m_tileSheet)
 		{
-			//sf::Sprite sprite = m_game->assets().getAnimation(e).getSprite();
 			m_spriteSheet->push_back(m_game->assets().getAnimation(e).getSprite());
 		}
 	}
@@ -289,7 +288,7 @@ void Scene_LevelEditor::update()
 void Scene_LevelEditor::sTilePool()
 {
 	float relativeX = m_game->window().getView().getCenter().x + (m_game->window().getSize().x / 2) - 256;
-	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getSize().y / 2)/* + 10*/;
+	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getView().getSize().y / 2)/* + 10*/;
 	m_poolBackground.setPosition({ relativeX, relativeY });
 	m_game->window().draw(m_poolBackground);
 	int currentRow = 1;
@@ -301,20 +300,34 @@ void Scene_LevelEditor::sTilePool()
 
 	for (sf::Sprite s : *m_spriteSheet)
 	{
+
 		float xLoc = relativeX + (currentCol * buffer) + (tileXCount * m_gridSize.x);
-		tileXCount++;
-		currentCol++;
 		float yLoc = relativeY + (currentRow * buffer) + (tileYCount * m_gridSize.y);
 		s.setPosition({ xLoc, yLoc });
 		m_game->window().draw(s);
 
-		// we have 3 tiles on this row, make a new row
-		if (tileXCount >= tilePerRow)
+		tileXCount++;
+		currentCol++;
+
+		if (tileXCount == tilePerRow)
 		{
 			tileXCount = 0;
+			currentCol = 1;
 			currentRow++;
 			tileYCount++;
 		}
+
+
+		//tileXCount++;
+		//currentCol++;
+		// we have 3 tiles on this row, make a new row
+		//if (tileXCount >= tilePerRow)
+		//{
+		//	tileXCount = 0;
+		//	currentCol = 1;
+		//	currentRow++;
+		//	tileYCount++;
+		//}
 	}
 }
 
