@@ -255,10 +255,8 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 
 void Scene_LevelEditor::spawnPoolBackground(sf::RectangleShape& background)
 {
-	background = sf::RectangleShape({ 256.0f, float(m_game->window().getView().getSize().y /*- 20*/)});
+	background = sf::RectangleShape({ 256.0f, float(m_game->window().getView().getSize().y)});
 	background.setFillColor(sf::Color::Red);
-	background.setOutlineColor(sf::Color::Black);
-	background.setOutlineThickness(3);
 	background.setPosition({ 0, 0});
 }
 
@@ -288,7 +286,7 @@ void Scene_LevelEditor::update()
 void Scene_LevelEditor::sTilePool()
 {
 	float relativeX = m_game->window().getView().getCenter().x + (m_game->window().getSize().x / 2) - 256;
-	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getView().getSize().y / 2)/* + 10*/;
+	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getView().getSize().y / 2);
 	m_poolBackground.setPosition({ relativeX, relativeY });
 	m_game->window().draw(m_poolBackground);
 	int currentRow = 1;
@@ -303,31 +301,20 @@ void Scene_LevelEditor::sTilePool()
 
 		float xLoc = relativeX + (currentCol * buffer) + (tileXCount * m_gridSize.x);
 		float yLoc = relativeY + (currentRow * buffer) + (tileYCount * m_gridSize.y);
-		s.setPosition({ xLoc, yLoc });
+		s.setPosition({ xLoc + 32, yLoc + 32 });
 		m_game->window().draw(s);
 
 		tileXCount++;
 		currentCol++;
 
-		if (tileXCount == tilePerRow)
+		// we have 3 tiles on this row, make a new row
+		if (tileXCount >= tilePerRow)
 		{
 			tileXCount = 0;
 			currentCol = 1;
 			currentRow++;
 			tileYCount++;
 		}
-
-
-		//tileXCount++;
-		//currentCol++;
-		// we have 3 tiles on this row, make a new row
-		//if (tileXCount >= tilePerRow)
-		//{
-		//	tileXCount = 0;
-		//	currentCol = 1;
-		//	currentRow++;
-		//	tileYCount++;
-		//}
 	}
 }
 
