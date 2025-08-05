@@ -89,7 +89,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 			if (item == "Decoration")
 			{
 				// TODO: replace hard-coded values with values from the config (OR - draw decorations in the correct pixel scale)
-				entity.getComponent<CTransform>().scale = { 5.0, 7.0 };
+				//entity.getComponent<CTransform>().scale = { 5.0, 7.0 };
 			}
 			if (item == "Tile")
 			{
