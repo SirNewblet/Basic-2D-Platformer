@@ -1,6 +1,7 @@
 Player PlayerIdle
-Decoration NonEnemyTree
+Decoration NonEnemyTreeNew
+Decoration LampBasic
 Tile Ground
-Tile GroundPurple
+Tile UnderGround
 Ladder LadderBone
 Enemy EnemyRunner
