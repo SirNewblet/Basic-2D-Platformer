@@ -15,6 +15,7 @@ typedef std::tuple<
 	std::vector<CDamage>,
 	std::vector<CDraggable>,
 	std::vector<CGravity>,
+	std::vector<CGridLocation>,
 	std::vector<CHealth>,
 	std::vector<CInput>,
 	std::vector<CLifespan>,

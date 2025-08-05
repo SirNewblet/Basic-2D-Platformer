@@ -8,16 +8,6 @@
 #include <iostream>
 #include <fstream>
 
-bool isInside(Vec2 pos, Entity e)
-{
-	auto ePos = e.getComponent<CTransform>().pos;
-	auto size = e.getComponent<CAnimation>().animation.getSize();
-	float dx = fabs(pos.x - ePos.x);
-	float dy = fabs(pos.y - ePos.y);
-
-	return ((dx <= size.x / 2) && (dy <= size.y / 2));
-}
-
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath) :
 	Scene(gameEngine),
 	m_levelPath(levelPath),
@@ -546,7 +536,7 @@ void Scene_Play::sDoAction(const Action& action)
 			//std::cout << "Mouse clicked at: " << worldPos.x << ", " << worldPos.y << std::endl;
 			for (auto e : m_entityManager.getEntities())
 			{
-				if (e.hasComponent<CDraggable>() && isInside(worldPos, e))
+				if (e.hasComponent<CDraggable>() && Physics::IsInside(worldPos, e))
 				{
 					std::cout << "CLICKED ON ENTITY: " << e.getComponent<CAnimation>().animation.getName() << std::endl;
 					e.getComponent<CDraggable>().dragging = !e.getComponent<CDraggable>().dragging;
