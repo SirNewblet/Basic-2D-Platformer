@@ -1,6 +1,6 @@
-PlayerIdle
-NonEnemyTree
-Ground
-GroundPurple
-LadderBone
-EnemyRunner
+Player PlayerIdle
+Decoration NonEnemyTree
+Tile Ground
+Tile GroundPurple
+Ladder LadderBone
+Enemy EnemyRunner

@@ -20,6 +20,7 @@ protected:
 	sf::Font						m_menuFont;
 	sf::RectangleShape				m_menuTextBackground;
 	size_t							m_selectedMenuIndex = 0;
+	size_t							m_selectedLevelIndex = 0;
 
 	void init();
 	void update();

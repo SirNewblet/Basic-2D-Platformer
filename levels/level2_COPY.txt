@@ -54,25 +54,4 @@ Tile Ground 38 7
 Tile Ground 34 6 
 Tile Ground 40 7 
 Tile Ground 35 7 
-Decoration NonEnemyTree 37 8 
-Tile Ground 41 8 
-Tile Ground 41 7 
-Tile Ground 42 8 
-Tile Ground 42 8 
-Tile Ground 42 9 
-Tile Ground 43 9 
-Tile Ground 43 10 
-Tile Ground 44 10 
-Ladder LadderBone 30 7 
-Tile GroundPurple 8 6 
-Player 1 5 48 48 8 -10 15 2 GUN 
-Tile GroundPurple 28 9 
-Tile GroundPurple 27 9 
-Tile GroundPurple 26 9 
-Tile GroundPurple 25 9 
-Ladder LadderBone 30 8 
-Ladder LadderBone 30 9 
-Tile GroundPurple 29 9 
-Enemy EnemyRunner 27 10 10 
-Enemy EnemyRunner 27 3 10 
-Decoration NonEnemyTree 21 1 
+Player 2 5 48 48 8 -10 15 2 GUN 

@@ -17,6 +17,7 @@ class Scene_LevelEditor : public Scene
 
 protected:
 	Entity								m_player;
+	EntityManager						m_entityPoolManager;
 	PlayerConfig						m_playerConfig;
 	std::string							m_levelPath;
 	std::string							m_lastAction;
@@ -31,9 +32,6 @@ protected:
 	Vec2								m_mPos;
 	sf::CircleShape						m_mouseShape;
 	sf::RectangleShape					m_poolBackground;
-
-	std::vector<std::string>			m_tileSheet;
-	std::shared_ptr<std::vector<sf::Sprite>> m_spriteSheet = std::make_shared<std::vector<sf::Sprite>>();;
 
 	Vec2 gridToMidPixel(float gridX, float gridY, Entity e);
 	Vec2 mouseToGrid(Vec2 m_mPos, Entity e);
@@ -52,7 +50,7 @@ protected:
 
 	void sDragAndDrop();
 	void sMovement();
-	void sTilePool();
+	void sEntityPool();
 	void sDoAction(const Action& action);
 	void sCamera();
 

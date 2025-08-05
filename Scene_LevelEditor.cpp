@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 Scene_LevelEditor::Scene_LevelEditor(GameEngine* gameEngine, const std::string& levelPath) :
 	Scene(gameEngine),
@@ -130,7 +131,20 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 
 	spawnPlayer();
 	spawnPoolBackground(m_poolBackground);
-	loadTileSheet("level_tilesheets/level1.txt");
+
+	std::smatch matches;
+	std::regex pattern("level\\d+\.txt");
+	std::string level = "";
+	if (std::regex_search(m_levelPath, matches, pattern))
+	{
+		level = matches[0];
+	}
+	else
+	{
+		level = "level1.txt";
+	}
+
+	loadTileSheet("level_tilesheets/" + level);
 
 
 	//      NOTE:
@@ -236,15 +250,14 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 	std::ifstream fin(tilesheet);
 	if (fin.is_open())
 	{
-		std::string item = "";
-		while (fin >> item)
+		std::string entityType = "";
+		std::string entityAnim = "";
+		while (fin >> entityType)
 		{
-			m_tileSheet.push_back(item);
-		}
-
-		for (auto e : m_tileSheet)
-		{
-			m_spriteSheet->push_back(m_game->assets().getAnimation(e).getSprite());
+			fin >> entityAnim;
+			auto ne = m_entityPoolManager.addEntity(entityType);
+			ne.addComponent<CAnimation>(m_game->assets().getAnimation(entityAnim), true);
+			ne.addComponent<CTransform>();
 		}
 	}
 	else
@@ -273,6 +286,7 @@ void Scene_LevelEditor::spawnPlayer()
 void Scene_LevelEditor::update()
 {
 	m_entityManager.update();
+	m_entityPoolManager.update();
 
 	// TODO: Implement pause functionality
 	sDragAndDrop();
@@ -283,10 +297,12 @@ void Scene_LevelEditor::update()
 	m_currentFrame++;
 }
 
-void Scene_LevelEditor::sTilePool()
+void Scene_LevelEditor::sEntityPool()
 {
 	float relativeX = m_game->window().getView().getCenter().x + (m_game->window().getSize().x / 2) - 256;
 	float relativeY = m_game->window().getView().getCenter().y - (m_game->window().getView().getSize().y / 2);
+	float xLoc = 0.0f;
+	float yLoc = 0.0f;
 	m_poolBackground.setPosition({ relativeX, relativeY });
 	m_game->window().draw(m_poolBackground);
 	int currentRow = 1;
@@ -296,13 +312,12 @@ void Scene_LevelEditor::sTilePool()
 	int tilePerRow = 3;
 	int buffer = 16;
 
-	for (sf::Sprite s : *m_spriteSheet)
+	for (auto e : m_entityPoolManager.getEntities())
 	{
 
-		float xLoc = relativeX + (currentCol * buffer) + (tileXCount * m_gridSize.x);
-		float yLoc = relativeY + (currentRow * buffer) + (tileYCount * m_gridSize.y);
-		s.setPosition({ xLoc + 32, yLoc + 32 });
-		m_game->window().draw(s);
+		xLoc = relativeX + (currentCol * buffer) + (tileXCount * m_gridSize.x);
+		yLoc = relativeY + (currentRow * buffer) + (tileYCount * m_gridSize.y);
+		e.getComponent<CTransform>().pos = {xLoc + 32, yLoc + 32};
 
 		tileXCount++;
 		currentCol++;
@@ -377,21 +392,52 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 		if (action.name() == "LEFT_CLICK")
 		{
 			Vec2 worldPos = windowToWorld(action.pos());
-			//std::cout << "Mouse clicked at: " << worldPos.x << ", " << worldPos.y << std::endl;
-			for (auto e : m_entityManager.getEntities())
+			if (action.pos().x > m_game->window().getSize().x - 256)
 			{
-				if (e.hasComponent<CDraggable>() && Physics::IsInside(worldPos, e))
+				for (auto e : m_entityPoolManager.getEntities())
 				{
-					std::cout << "CLICKED ON ENTITY: " << e.getComponent<CAnimation>().animation.getName() << std::endl;
-					e.getComponent<CDraggable>().dragging = !e.getComponent<CDraggable>().dragging;
-					if (!e.getComponent<CDraggable>().dragging)
+					if (Physics::IsInside(worldPos, e))
 					{
-						// put entity into the correct grid location (snapping)
-						Vec2 gridLocation = mouseToGrid(worldPos, e);
-						e.getComponent<CGridLocation>().x = gridLocation.x;
-						e.getComponent<CGridLocation>().y = gridLocation.y;
-						e.getComponent<CTransform>().pos = gridToMidPixel(gridLocation.x, gridLocation.y, e);
-						 
+						if (e.tag() == "Player")
+						{
+							std::cout << "Error: Player already exists.\n";
+						}
+						else
+						{
+							auto ne = m_entityManager.addEntity(e.tag());
+							ne.addComponent<CAnimation>(m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getName()));
+							ne.addComponent<CTransform>();
+							ne.getComponent<CTransform>().pos = action.pos();
+							ne.addComponent<CDraggable>().dragging = true;
+							ne.addComponent<CGridLocation>();
+							if (ne.tag() == "Enemy")
+							{
+								// default a new enemy's damage to 10
+								ne.addComponent<CDamage>().damage = 10;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				Vec2 worldPos = windowToWorld(action.pos());
+				//std::cout << "Mouse clicked at: " << worldPos.x << ", " << worldPos.y << std::endl;
+				for (auto e : m_entityManager.getEntities())
+				{
+					if (e.hasComponent<CDraggable>() && Physics::IsInside(worldPos, e))
+					{
+						std::cout << "CLICKED ON ENTITY: " << e.getComponent<CAnimation>().animation.getName() << std::endl;
+						e.getComponent<CDraggable>().dragging = !e.getComponent<CDraggable>().dragging;
+						if (!e.getComponent<CDraggable>().dragging)
+						{
+							// put entity into the correct grid location (snapping)
+							Vec2 gridLocation = mouseToGrid(worldPos, e);
+							e.getComponent<CGridLocation>().x = gridLocation.x;
+							e.getComponent<CGridLocation>().y = gridLocation.y;
+							e.getComponent<CTransform>().pos = gridToMidPixel(gridLocation.x, gridLocation.y, e);
+
+						}
 					}
 				}
 			}
@@ -445,7 +491,16 @@ void Scene_LevelEditor::sRender()
 			}
 		}
 
-		sTilePool();
+		sEntityPool();
+		for (auto e : m_entityPoolManager.getEntities())
+		{
+			auto& transform = e.getComponent<CTransform>();
+			auto& animation = e.getComponent<CAnimation>().animation;
+			animation.getSprite().setRotation(sf::degrees(transform.angle));
+			animation.getSprite().setPosition({ transform.pos.x, transform.pos.y });
+			animation.getSprite().setScale({ transform.scale.x, transform.scale.y });
+			m_game->window().draw(animation.getSprite());
+		}
 	}
 
 	// Draw the grid so that students can easily debug
