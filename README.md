@@ -40,6 +40,7 @@ Here are some of the highlights of the game:
 - ✅ Entity-Component-System (ECS) architecture for modularity
 - ✅ Entity-Component Memory Pooling to take advantage of cache-coherency
 - ✅ Kanban (Jira) for project management
+- ✅ Level Editor with file loading + saving (includes backups)
 
 ---
 
