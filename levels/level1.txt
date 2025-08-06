@@ -173,7 +173,6 @@ Tile UnderGround 44 1
 Tile UnderGround 44 0 
 Tile UnderGround 43 0 
 Decoration NonEnemyTreeNew 9 7 
-Player 1 5 48 48 8 -10 15 2 GUN 
 Tile Ground 40 6 
 Tile Ground 41 5 
 Tile Ground 42 4 
@@ -188,3 +187,11 @@ Tile UnderGround 46 0
 Tile UnderGround 47 0 
 Tile UnderGround 48 0 
 Tile UnderGround 49 0 
+Player 1 5 48 48 8 -10 15 2 GUN 
+Destroyable DestroyableGround 18 8 
+Destroyable DestroyableGround 18 7 
+Destroyable DestroyableUnderGround 18 9 
+Destroyable DestroyableUnderGround 18 10 
+Destroyable DestroyableGround 17 9 
+Destroyable DestroyableGround 19 9 
+Destroyable DestroyableUnderGround 18 6 

@@ -84,7 +84,7 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 
 	while (fin >> item)
 	{
-		if (item == "Tile" || item == "Decoration" || item == "Ladder")
+		if (item == "Tile" || item == "Decoration" || item == "Ladder" || item == "Destroyable")
 		{
 
 			int tileGX = 0, tileGY = 0;
@@ -220,7 +220,7 @@ void Scene_LevelEditor::saveLevel(const std::string& levelPath)
 						int(e.getComponent<CDamage>().damage) << " \n";
 
 				}
-				if (e.tag() == "Tile" || e.tag() == "Decoration" || e.tag() == "Ladder")
+				if (e.tag() == "Tile" || e.tag() == "Decoration" || e.tag() == "Ladder" || e.tag() == "Destroyable")
 				{
 					fout << 
 						e.tag() << " " << 
@@ -258,6 +258,10 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 			auto ne = m_entityPoolManager.addEntity(entityType);
 			ne.addComponent<CAnimation>(m_game->assets().getAnimation(entityAnim), true);
 			ne.addComponent<CTransform>();
+			if (entityType == "Destroyable")
+			{
+				ne.addComponent<CDestroyable>();
+			}
 		}
 	}
 	else
@@ -496,6 +500,16 @@ void Scene_LevelEditor::sRender()
 		{
 			auto& transform = e.getComponent<CTransform>();
 			auto& animation = e.getComponent<CAnimation>().animation;
+
+			if (e.getComponent<CDestroyable>().has)
+			{
+				sf::RectangleShape rect({ float(animation.getSprite().getTexture().getSize().x), float(animation.getSprite().getTexture().getSize().y)});
+				rect.setOutlineColor(sf::Color::Green);
+				rect.setOutlineThickness(4);
+				rect.setPosition({ transform.pos.x - (animation.getSprite().getTexture().getSize().x / 2), transform.pos.y - (animation.getSprite().getTexture().getSize().y / 2)});
+				m_game->window().draw(rect);
+			}
+
 			animation.getSprite().setRotation(sf::degrees(transform.angle));
 			animation.getSprite().setPosition({ transform.pos.x, transform.pos.y });
 			animation.getSprite().setScale({ transform.scale.x, transform.scale.y });
@@ -503,7 +517,7 @@ void Scene_LevelEditor::sRender()
 		}
 	}
 
-	// Draw the grid so that students can easily debug
+	// Draw the grid for easy viewing of tile placement and world size
 	if (m_drawGrid)
 	{
 		float leftX = m_game->window().getView().getCenter().x - width() / 2;

@@ -1,7 +1,9 @@
 Player PlayerIdle
-Decoration NonEnemyTreeNew
-Decoration LampBasic
 Tile Ground
 Tile UnderGround
+Destroyable DestroyableGround
+Destroyable DestroyableUnderGround
 Ladder LadderBone
 Enemy EnemyRunner
+Decoration NonEnemyTreeNew
+Decoration LampBasic

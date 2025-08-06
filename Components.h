@@ -44,6 +44,12 @@ public:
 	CDamage(float d) : damage(d) {};
 };
 
+class CDestroyable : public Component
+{
+public:
+	CDestroyable() {};
+};
+
 class CDraggable : public Component
 {
 public:

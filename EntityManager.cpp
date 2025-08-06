@@ -57,3 +57,18 @@ const EntityVec& EntityManager::getEntities(const std::string& tag)
 {
 	return m_entityMap[tag];
 }
+
+const EntityVec& EntityManager::getEntities(const std::vector<std::string>& tags)
+{
+	m_tagged.clear();
+
+	for (const auto& tag : tags)
+	{
+		for (auto& b : m_entityMap[tag])
+		{
+			m_tagged.push_back(b);
+		}
+	}
+
+	return m_tagged;
+}

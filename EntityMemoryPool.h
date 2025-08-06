@@ -13,6 +13,7 @@ typedef std::tuple<
 	std::vector<CBoundingBox>,
 	std::vector<CClimbable>,
 	std::vector<CDamage>,
+	std::vector<CDestroyable>,
 	std::vector<CDraggable>,
 	std::vector<CGravity>,
 	std::vector<CGridLocation>,
