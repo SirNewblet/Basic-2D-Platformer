@@ -11,7 +11,7 @@ Texture TexEnemyRunnerIdle images/EnemyRunnerIdle.png
 Texture TexGroundPurple images/GroundPurple.png
 Texture TexUnderGround images/UnderGround.png
 Texture TexNonEnemyTreeNew images/NonEnemyTreeNew.png
-Texture TexHeartFull images/HeatFull2.png
+Texture TexHeartFull images/HeartFull2.png
 Texture TexHeartEmpty images/HeartEmpty2.png
 Texture TexLampBasic images/DecorationLampBasic.png
 Animation BulletAlive TexBulletAlive 16 2
@@ -21,6 +21,8 @@ Animation PlayerJump TexPlayerJump 8 4
 Animation PlayerRun TexPlayerRun 5 4
 Animation NonEnemyTree TexNonEnemyTree 4 8
 Animation Ground TexGround 1 0
+Animation DestroyableGround TexGround 1 0
+Animation DestroyableUnderGround TexUnderGround 1 0
 Animation GroundPurple TexGroundPurple 1 0
 Animation GroundDead TexGroundDead 8 2
 Animation LadderBone TexLadderBone 1 0

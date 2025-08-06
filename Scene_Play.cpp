@@ -74,7 +74,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 
 	while (fin >> item)
 	{
-		if (item == "Tile" || item == "Decoration" || item == "Ladder")
+		if (item == "Tile" || item == "Decoration" || item == "Ladder" || item == "Destroyable")
 		{
 			
 			int tileGX = 0, tileGY = 0;
@@ -91,11 +91,16 @@ void Scene_Play::loadLevel(const std::string& filename)
 				// TODO: replace hard-coded values with values from the config (OR - draw decorations in the correct pixel scale)
 				//entity.getComponent<CTransform>().scale = { 5.0, 7.0 };
 			}
-			if (item == "Tile")
+			if (item == "Tile" || item == "Destroyable")
 			{
 				// Decorations should not have a bounding box
 				entity.addComponent<CBoundingBox>(Vec2(entity.getComponent<CAnimation>().animation.getSize().x, entity.getComponent<CAnimation>().animation.getSize().y));
 				entity.addComponent<CState>("ALIVE");
+
+				if (item == "Destroyable")
+				{
+					entity.addComponent<CDestroyable>();
+				}
 			}
 			if (item == "Ladder")
 			{
@@ -290,7 +295,7 @@ void Scene_Play::sStatus()
 					e.getComponent<CAnimation>().repeat = false;
 				}
 			}
-			else if (e.tag() == "Tile")
+			else if (e.tag() == "Tile" || e.tag() == "Destroyable")
 			{
 				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getName() != "GroundDead")
 				{
@@ -410,8 +415,8 @@ void Scene_Play::sCollision()
 	// Player collision with tiles
 	Vec2 overlap(0, 0);
 	auto& pPos = m_player.getComponent<CTransform>();
-
-	for (auto e : m_entityManager.getEntities("Tile"))
+	std::vector<std::string> tiles = { "Tile", "Destroyable" };
+	for (auto e : m_entityManager.getEntities(tiles))
 	{
 		overlap = Physics::GetOverlap(e, m_player);
 		// Collision detected
@@ -458,10 +463,14 @@ void Scene_Play::sCollision()
 		for (auto b : m_entityManager.getEntities("Bullet"))
 		{
 			overlap = Physics::GetOverlap(e, b);
-			if (overlap.x > 0 && overlap.y > 0)
+			if ((overlap.x > 0 && overlap.y > 0) && e.getComponent<CDestroyable>().has)
 			{
 				b.getComponent<CState>().state = "DEAD";
 				e.getComponent<CState>().state = "DEAD";
+			}
+			else if (overlap.x > 0 && overlap.y > 0)
+			{
+				b.getComponent<CState>().state = "DEAD";
 			}
 		}
 	}
