@@ -11,8 +11,8 @@ Texture TexEnemyRunnerIdle images/EnemyRunnerIdle.png
 Texture TexGroundPurple images/GroundPurple.png
 Texture TexUnderGround images/UnderGround.png
 Texture TexNonEnemyTreeNew images/NonEnemyTreeNew.png
-Texture TexHeartFull images/HeartFull2.png
-Texture TexHeartEmpty images/HeartEmpty2.png
+Texture TexHeartFull images/HeartFull.png
+Texture TexHeartEmpty images/HeartEmpty.png
 Texture TexLampBasic images/DecorationLampBasic.png
 Animation BulletAlive TexBulletAlive 16 2
 Animation BulletDead TexBulletDead 10 2
@@ -33,3 +33,4 @@ Animation HeartFull TexHeartFull 1 0
 Animation HeartEmpty TexHeartEmpty 1 0
 Animation LampBasic TexLampBasic 1 0
 Font Sooky fonts/sooky.ttf
+Font Alagard fonts/alagard.ttf

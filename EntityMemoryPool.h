@@ -19,6 +19,7 @@ typedef std::tuple<
 	std::vector<CGridLocation>,
 	std::vector<CHealth>,
 	std::vector<CInput>,
+	std::vector<CInvulnerable>,
 	std::vector<CLifespan>,
 	std::vector<CState>,
 	std::vector<CTransform>> EntityComponentVectorTuple;

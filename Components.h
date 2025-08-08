@@ -105,6 +105,20 @@ public:
 	CInput() {};
 };
 
+class CInvulnerable : public Component
+{
+public:
+	// 180 frames = 3 seconds of invulnerability @ 60 fps
+	int invulnerableFrames = 180;
+	int frameCreated = 0;
+	bool isInvulnerable = false;
+
+	CInvulnerable() {};
+	CInvulnerable(int duration, int frame) :
+		invulnerableFrames(duration), frameCreated(frame) 
+	{ }
+};
+
 class CLifespan : public Component
 {
 public:
@@ -112,8 +126,8 @@ public:
 	int frameCreated = 0;
 	CLifespan() {};
 	CLifespan(int duration, int frame) :
-		lifespan(duration), frameCreated(frame) {
-	}
+		lifespan(duration), frameCreated(frame) 
+	{ }
 };
 
 class CState : public Component
