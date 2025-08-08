@@ -142,21 +142,6 @@ void Scene_Play::loadLevel(const std::string& filename)
 	}
 
 	spawnPlayer();
-
-
-	//      NOTE:
-	//------  THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE  ----------
-	//		Components are now returned as references rather than pointers. If you
-	//		do not specify a reference variable type, it will COPY the component
-	//		Here is an example:
-	//		
-	//		This will COPY the transform into the variable "transform1" - it is INCORRECT
-	//		Any changes you make to transform1 will not be changed inside the entity
-	//		auto transform1 = entity->get<CTransform>()
-	//
-	//		This will REFERENCE the transform with the variable "transform2" - it is CORRECT
-	//		Now any changes you make to transform2 will be changed inside the entity
-	//		auto& transform2 = entity->get<CTransform>()
 }
 
 void Scene_Play::spawnPlayer()
@@ -167,7 +152,10 @@ void Scene_Play::spawnPlayer()
 	m_player.addComponent<CState>().state = "JUMPING";
 	m_player.addComponent<CBoundingBox>(Vec2(m_playerConfig.collisionX, m_playerConfig.collisionY));
 	m_player.addComponent<CGravity>(m_playerConfig.gravity);
+	m_player.addComponent<CInvulnerable>();
 	m_player.addComponent<CHealth>();
+	m_player.getComponent<CHealth>().currentHealth = 5;
+	m_player.getComponent<CHealth>().maxHealth = 5;
 }
 
 void Scene_Play::spawnBullet(Entity entity)
@@ -222,17 +210,36 @@ void Scene_Play::sLifespan()
 				e.destroy();
 			}
 		}
+
+		if (e.hasComponent<CInvulnerable>())
+		{
+			if (m_currentFrame - e.getComponent<CInvulnerable>().frameCreated > e.getComponent<CInvulnerable>().invulnerableFrames)
+			{
+				e.getComponent<CInvulnerable>().isInvulnerable = false;
+			}
+		}
 	}
 }
 
 void Scene_Play::sCamera()
 {
+	float camYVelocity = 5.0f;
 	// TODO: Keep Camera on player unless player runs left / falls down a hole / enters a gate
 	// Set the viewport of the window to be centered on the player if it's far enough right
 	auto& pPos = m_player.getComponent<CTransform>().pos;
 	float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, pPos.x);
 	sf::View view = m_game->window().getView();
-	view.setCenter({ windowCenterX, m_game->window().getSize().y - view.getCenter().y });
+	float windowCenterY = view.getCenter().y;
+
+	if (pPos.y < view.getCenter().y * 0.8f)
+	{
+		windowCenterY -= camYVelocity;
+	}
+	else if (pPos.y > view.getCenter().y)
+	{
+		windowCenterY += camYVelocity;
+	}
+	view.setCenter({ windowCenterX, windowCenterY });
 	m_game->window().setView(view);
 }
 
@@ -265,7 +272,7 @@ void Scene_Play::sStatus()
 				}
 				else if (e.getComponent<CState>().state == "JUMPING" && e.getComponent<CAnimation>().animation.getName() != "PlayerJump")
 				{
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump");
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump" );
 				}
 				else if (e.getComponent<CState>().state == "RUNNING" && e.getComponent<CAnimation>().animation.getName() != "PlayerRun")
 				{
@@ -274,16 +281,17 @@ void Scene_Play::sStatus()
 				else if (e.getComponent<CState>().state == "SHOOTING")
 				{
 					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerShoot");
 				}
 				else if (e.getComponent<CState>().state == "CROUCHING")
 				{
 					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerCrouch");
 				}
 				else if (e.getComponent<CState>().state == "CLIMBING")
 				{
 					// TODO
 					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerClimb");
-					std::cout << "TEST WORKING" << std::endl;
 				}
 			}
 			else if (e.tag() == "Bullet")
@@ -334,6 +342,7 @@ void Scene_Play::sMovement()
 				{
 					e.getComponent<CState>().state = "CLIMBING";
 					e.getComponent<CTransform>().velocity.y = -5.0f;
+					e.getComponent<CTransform>().velocity.x = 0.0f;
 				}
 				else
 				{
@@ -510,6 +519,18 @@ void Scene_Play::sCollision()
 		}
 	}
 
+	for (auto e : m_entityManager.getEntities("Enemy"))
+	{
+		overlap = Physics::GetOverlap(m_player, e);
+		if ((overlap.x > 0 && overlap.y > 0) && !m_player.getComponent<CInvulnerable>().isInvulnerable)
+		{
+			m_player.getComponent<CHealth>().currentHealth -= 1;
+			m_player.getComponent<CInvulnerable>().frameCreated = m_currentFrame;
+			m_player.getComponent<CInvulnerable>().isInvulnerable = true;
+			break;
+		}
+	}
+
 	// Not using bounding box here since we want the player to be off screen before we respawn them
 	if (m_player.getComponent<CTransform>().pos.y > m_game->window().getSize().y + m_player.getComponent<CAnimation>().animation.getSize().y)
 	{
@@ -519,6 +540,12 @@ void Scene_Play::sCollision()
 	if (m_player.getComponent<CTransform>().pos.x - m_player.getComponent<CBoundingBox>().halfSize.x < 0)
 	{
 		m_player.getComponent<CTransform>().pos.x = m_player.getComponent<CBoundingBox>().halfSize.x;
+	}
+
+	if (m_player.getComponent<CHealth>().currentHealth <= 0)
+	{
+		m_player.getComponent<CHealth>().currentHealth = m_player.getComponent<CHealth>().maxHealth;
+		m_player.getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.gridX, m_playerConfig.gridY, m_player);
 	}
 }
 
@@ -575,9 +602,10 @@ void Scene_Play::sDoAction(const Action& action)
 
 void Scene_Play::sDisplayHealth()
 {
-	for (auto e : m_entityManager.getEntities())
+	std::vector<std::string> ents = { "Enemy", "Player" };
+	for (auto e : m_entityManager.getEntities(ents))
 	{
-		if (e.hasComponent<CHealth>())
+		if (e.tag() == "Enemy" && e.hasComponent<CHealth>())
 		{
 			if (e.getComponent<CHealth>().currentHealth < e.getComponent<CHealth>().maxHealth && e.getComponent<CState>().state != "DEAD")
 			{
@@ -594,6 +622,29 @@ void Scene_Play::sDisplayHealth()
 
 				m_game->window().draw(rectBack);
 				m_game->window().draw(rectFront);
+			}
+		}
+
+		if (e.tag() == "Player" && e.hasComponent<CHealth>())
+		{
+			float offset = 32;
+			for (int i = 0; i < e.getComponent<CHealth>().currentHealth; i++)
+			{
+				auto spr = sf::Sprite(m_game->assets().getAnimation("HeartFull").getSprite());
+				auto pos = windowToWorld({ offset, 32 });
+				spr.setPosition({ pos.x, pos.y });
+				m_game->window().draw(spr);
+
+				offset += spr.getLocalBounds().size.x;
+			}
+			for (int i = 0; i < e.getComponent<CHealth>().maxHealth - e.getComponent<CHealth>().currentHealth; i++)
+			{
+				auto spr = sf::Sprite(m_game->assets().getAnimation("HeartEmpty").getSprite());
+				auto pos = windowToWorld({ offset, 32 });
+				spr.setPosition({ pos.x, pos.y });
+				m_game->window().draw(spr);
+
+				offset += spr.getLocalBounds().size.x;
 			}
 		}
 	}
@@ -619,6 +670,13 @@ void Scene_Play::sAnimation()
 				{
 					e.getComponent<CAnimation>().animation.update();
 				}
+			}
+		}
+		if (e.hasComponent<CInvulnerable>())
+		{
+			if (e.getComponent<CInvulnerable>().isInvulnerable)
+			{
+				// do shading of the current animation to show invulnverability
 			}
 		}
 	}

@@ -42,7 +42,7 @@ void Scene_Menu::init()
 	auto menuCharacter = m_entityManager.addEntity("Tile");
 	menuCharacter.addComponent<CAnimation>(m_game->assets().getAnimation("PlayerRun"), true);
 	menuCharacter.addComponent<CTransform>();
-	menuCharacter.getComponent<CTransform>().scale = { 7, 7 };
+	menuCharacter.getComponent<CTransform>().scale = { 2, 2 };
 	menuCharacter.getComponent<CTransform>().pos = { (float)m_game->window().getSize().x / 2.0f, (float)m_game->window().getSize().y / 2.0f };
 
 	registerAction(sf::Keyboard::Key::W,		"UP");
