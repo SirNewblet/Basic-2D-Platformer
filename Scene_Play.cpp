@@ -175,17 +175,19 @@ void Scene_Play::update()
 {
 	m_entityManager.update();
 
-	// TODO: Implement pause functionality
-	sDragAndDrop();
-	sLifespan();
-	sMovement();
-	sCollision();
-	sStatus();
-	sAnimation();
-	sCamera();
-	sRender();
+	if (!m_paused)
+	{
+		sDragAndDrop();
+		sLifespan();
+		sMovement();
+		sCollision();
+		sStatus();
+		sAnimation();
+		sCamera();
+		m_currentFrame++;
+	}
 
-	m_currentFrame++;
+	sRender();
 }
 
 void Scene_Play::sDragAndDrop()
@@ -729,7 +731,6 @@ void Scene_Play::sRender()
 		}
 	}
 
-	// Draw the grid so that students can easily debug
 	if (m_drawGrid)
 	{
 		float leftX = m_game->window().getView().getCenter().x - width() / 2;
@@ -761,7 +762,6 @@ void Scene_Play::sRender()
 	Vec2 worldPos = windowToWorld(m_mPos);
 	m_mouseShape.setPosition({ worldPos.x, worldPos.y });
 	m_game->window().draw(m_mouseShape);
-	m_currentFrame++;
 }
 
 void Scene_Play::onEnd()

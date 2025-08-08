@@ -16,10 +16,8 @@ Tile Ground 11 1
 Tile Ground 12 2 
 Tile Ground 15 1 
 Tile Ground 16 1 
-Enemy EnemyRunner 16 2 10 
 Tile Ground 18 0 
 Tile Ground 19 0 
-Enemy EnemyRunner 9 1 10 
 Tile Ground 20 0 
 Tile Ground 21 0 
 Tile Ground 22 0 
@@ -32,7 +30,6 @@ Ladder LadderBone 13 4
 Tile Ground 24 0 
 Tile Ground 25 0 
 Tile Ground 36 7 
-Enemy EnemyRunner 35 8 10 
 Tile Ground 28 2 
 Tile Ground 29 3 
 Tile Ground 30 4 
@@ -49,8 +46,6 @@ Tile Ground 35 7
 Ladder LadderBone 30 7 
 Ladder LadderBone 30 8 
 Ladder LadderBone 30 9 
-Enemy EnemyRunner 27 10 10 
-Enemy EnemyRunner 27 3 10 
 Tile UnderGround 11 0 
 Tile UnderGround 13 2 
 Tile UnderGround 12 1 
@@ -224,7 +219,6 @@ Tile UnderGround 61 0
 Tile UnderGround 60 0 
 Tile UnderGround 59 0 
 Tile UnderGround 58 0 
-Enemy EnemyRunner 57 10 10 
 Tile Ground 72 1 
 Tile Ground 73 1 
 Tile Ground 74 1 
@@ -266,7 +260,6 @@ Tile UnderGround 86 0
 Tile UnderGround 84 0 
 Tile UnderGround 85 0 
 Tile UnderGround 83 0 
-Player 1 5 48 48 8 -10 15 2 GUN 
 Destroyable DestroyableUnderGround 34 4 
 Destroyable DestroyableUnderGround 35 4 
 Destroyable DestroyableUnderGround 36 4 
@@ -287,3 +280,5 @@ Destroyable DestroyableUnderGround 37 2
 Destroyable DestroyableUnderGround 36 2 
 Destroyable DestroyableUnderGround 35 2 
 Destroyable DestroyableUnderGround 34 2 
+Player 1 5 48 48 8 -10 15 2 GUN 
+Enemy EnemyRunner 86 2 10 
