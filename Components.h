@@ -20,6 +20,17 @@ public:
 		animation(ani), repeat(r) { }
 };
 
+class CAttacking : public Component
+{
+public:
+	bool canAttack = true;
+	bool isAttacking = false;
+	bool isInReach = false;
+	int started = 0;
+	int duration = 0;
+	CAttacking() {};
+};
+
 class CBoundingBox : public Component
 {
 public:

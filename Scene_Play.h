@@ -44,6 +44,7 @@ protected:
 	void sDoAction(const Action& action);
 	void sMovement();
 	void sStatus();
+	void sEnemyLogic();
 	void sAnimation();
 	void sDisplayHealth();
 	void sCollision();

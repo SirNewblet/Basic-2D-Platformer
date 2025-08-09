@@ -281,4 +281,4 @@ Destroyable DestroyableUnderGround 36 2
 Destroyable DestroyableUnderGround 35 2 
 Destroyable DestroyableUnderGround 34 2 
 Player 1 5 48 48 8 -10 15 2 GUN 
-Enemy EnemyRunner 86 2 10 
+Enemy EnemyRunnerIdle 86 2 10 

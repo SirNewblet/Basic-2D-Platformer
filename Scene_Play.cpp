@@ -124,7 +124,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
 			enemy.getComponent<CTransform>().pos.y += enemy.getComponent<CAnimation>().animation.getSize().y * 0.15f;
 			enemy.addComponent<CState>("ALIVE");
-			enemy.addComponent<CHealth>(50);
+			enemy.addComponent<CHealth>(100);
 		}
 		else if (item == "Player")
 		{
@@ -177,9 +177,10 @@ void Scene_Play::update()
 
 	if (!m_paused)
 	{
-		sDragAndDrop();
+		//sDragAndDrop();
 		sLifespan();
 		sMovement();
+		sEnemyLogic();
 		sCollision();
 		sStatus();
 		sAnimation();
@@ -201,6 +202,9 @@ void Scene_Play::sDragAndDrop()
 	}
 }
 
+/// <summary>
+/// Method to handle lifespan of entities and events. This includes invulnerable frames, attack delay, acid pools, etc.
+/// </summary>
 void Scene_Play::sLifespan()
 {
 	for (auto e : m_entityManager.getEntities())
@@ -218,6 +222,15 @@ void Scene_Play::sLifespan()
 			if (m_currentFrame - e.getComponent<CInvulnerable>().frameCreated > e.getComponent<CInvulnerable>().invulnerableFrames)
 			{
 				e.getComponent<CInvulnerable>().isInvulnerable = false;
+			}
+		}
+
+		if (e.hasComponent<CAttacking>())
+		{
+			if (m_currentFrame - e.getComponent<CAttacking>().started > e.getComponent<CAttacking>().duration)
+			{
+				e.getComponent<CAttacking>().canAttack = true;
+				e.getComponent<CAttacking>().isAttacking = false;
 			}
 		}
 	}
@@ -243,6 +256,29 @@ void Scene_Play::sCamera()
 	}
 	view.setCenter({ windowCenterX, windowCenterY });
 	m_game->window().setView(view);
+}
+
+void Scene_Play::sEnemyLogic()
+{
+	// default speed of an enemy attack for now until I update the config
+	float atkSpeed = 0.0f;
+	for (auto e : m_entityManager.getEntities("Enemy"))
+	{
+		e.getComponent<CTransform>().scale.x = (m_player.getComponent<CTransform>().pos.x < e.getComponent<CTransform>().pos.x) ? 1 : -1;
+
+		if (e.hasComponent<CAttacking>())
+		{
+			e.getComponent<CAttacking>().isInReach = (abs(m_player.getComponent<CTransform>().pos.x - e.getComponent<CTransform>().pos.x) < m_game->window().getView().getSize().x * 0.80f);
+			if (e.getComponent<CAttacking>().isInReach && e.getComponent<CAttacking>().canAttack)
+			{
+				e.getComponent<CAttacking>().canAttack = false;
+				e.getComponent<CAttacking>().started = m_currentFrame;
+				e.getComponent<CAttacking>().duration = 64;
+				e.getComponent<CTransform>().velocity.x = 20 * -(e.getComponent<CTransform>().scale.x);
+				e.getComponent<CState>().state = "RUSH";
+			}
+		}
+	}
 }
 
 void Scene_Play::sStatus()
@@ -295,6 +331,11 @@ void Scene_Play::sStatus()
 					// TODO
 					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerClimb");
 				}
+				else if (e.getComponent<CState>().state == "DEAD")
+				{
+					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerDead");
+				}
 			}
 			else if (e.tag() == "Bullet")
 			{
@@ -311,6 +352,22 @@ void Scene_Play::sStatus()
 				{
 					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("GroundDead");
 					e.getComponent<CAnimation>().repeat = false;
+				}
+			}
+			else if (e.tag() == "Enemy" && e.getComponent<CAttacking>().isAttacking)
+			{
+				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getName() != "EnemyDead")
+				{
+					// TODO: Create enemy death animation
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
+				}
+				else if (e.getComponent<CState>().state == "RUSH")
+				{
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("EnemyRunnerRush");
+				}
+				else if (e.getComponent<CState>().state == "IDLE")
+				{
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("EnemyRunnerIdle");
 				}
 			}
 		}
@@ -394,6 +451,14 @@ void Scene_Play::sMovement()
 			else
 			{
 				e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
+			}
+		}
+
+		if (e.tag() == "Enemy" && e.hasComponent<CAttacking>())
+		{
+			if (e.getComponent<CAttacking>().isAttacking)
+			{
+
 			}
 		}
 
@@ -576,7 +641,6 @@ void Scene_Play::sDoAction(const Action& action)
 			{
 				if (e.hasComponent<CDraggable>() && Physics::IsInside(worldPos, e))
 				{
-					std::cout << "CLICKED ON ENTITY: " << e.getComponent<CAnimation>().animation.getName() << std::endl;
 					e.getComponent<CDraggable>().dragging = !e.getComponent<CDraggable>().dragging;
 				}
 			}

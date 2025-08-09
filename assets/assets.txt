@@ -8,6 +8,7 @@ Texture TexGroundDead images/GroundDead.png
 Texture TexLadderBone images/LadderBone.png
 Texture TexNonEnemyTree images/NonEnemyTree.png
 Texture TexEnemyRunnerIdle images/EnemyRunnerIdle.png
+Texture TexEnemyRunnerRush images/EnemyRunnerRush.png
 Texture TexGroundPurple images/GroundPurple.png
 Texture TexUnderGround images/UnderGround.png
 Texture TexNonEnemyTreeNew images/NonEnemyTreeNew.png
@@ -26,7 +27,8 @@ Animation DestroyableUnderGround TexUnderGround 1 0
 Animation GroundPurple TexGroundPurple 1 0
 Animation GroundDead TexGroundDead 8 2
 Animation LadderBone TexLadderBone 1 0
-Animation EnemyRunner TexEnemyRunnerIdle 8 8
+Animation EnemyRunnerIdle TexEnemyRunnerIdle 8 8
+Animation EnemyRunnerRush TexEnemyRunnerRush 8 8
 Animation UnderGround TexUnderGround 1 0
 Animation NonEnemyTreeNew TexNonEnemyTreeNew 4 8
 Animation HeartFull TexHeartFull 1 0
