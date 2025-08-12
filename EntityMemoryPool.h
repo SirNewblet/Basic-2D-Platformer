@@ -10,6 +10,7 @@ static const size_t MAX_ENTITIES = 1000000;
 
 typedef std::tuple<
 	std::vector<CAnimation>,
+	std::vector<CAttacking>,
 	std::vector<CBoundingBox>,
 	std::vector<CClimbable>,
 	std::vector<CDamage>,

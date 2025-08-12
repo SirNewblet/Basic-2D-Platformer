@@ -120,11 +120,14 @@ void Scene_Play::loadLevel(const std::string& filename)
 			auto enemy = m_entityManager.addEntity("Enemy");
 			enemy.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			enemy.addComponent<CTransform>();
-			enemy.addComponent<CBoundingBox>(Vec2(enemy.getComponent<CAnimation>().animation.getSize().x * 0.85f, enemy.getComponent<CAnimation>().animation.getSize().y * 0.85f));
+			enemy.addComponent<CBoundingBox>(Vec2(enemy.getComponent<CAnimation>().animation.getSize().x * 0.75f, enemy.getComponent<CAnimation>().animation.getSize().y * 0.75f));
 			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
 			enemy.getComponent<CTransform>().pos.y += enemy.getComponent<CAnimation>().animation.getSize().y * 0.15f;
 			enemy.addComponent<CState>("ALIVE");
-			enemy.addComponent<CHealth>(50);
+			enemy.addComponent<CHealth>(100);
+			enemy.addComponent<CAttacking>();
+			enemy.getComponent<CAttacking>().coolDown = 180;
+			enemy.getComponent<CAttacking>().duration = 64;
 		}
 		else if (item == "Player")
 		{
@@ -175,17 +178,20 @@ void Scene_Play::update()
 {
 	m_entityManager.update();
 
-	// TODO: Implement pause functionality
-	sDragAndDrop();
-	sLifespan();
-	sMovement();
-	sCollision();
-	sStatus();
-	sAnimation();
-	sCamera();
-	sRender();
+	if (!m_paused)
+	{
+		//sDragAndDrop();
+		sLifespan();
+		sMovement();
+		sEnemyLogic();
+		sCollision();
+		sStatus();
+		sAnimation();
+		sCamera();
+		m_currentFrame++;
+	}
 
-	m_currentFrame++;
+	sRender();
 }
 
 void Scene_Play::sDragAndDrop()
@@ -199,6 +205,9 @@ void Scene_Play::sDragAndDrop()
 	}
 }
 
+/// <summary>
+/// Method to handle lifespan of entities and events. This includes invulnerable frames, attack delay, acid pools, etc.
+/// </summary>
 void Scene_Play::sLifespan()
 {
 	for (auto e : m_entityManager.getEntities())
@@ -216,6 +225,21 @@ void Scene_Play::sLifespan()
 			if (m_currentFrame - e.getComponent<CInvulnerable>().frameCreated > e.getComponent<CInvulnerable>().invulnerableFrames)
 			{
 				e.getComponent<CInvulnerable>().isInvulnerable = false;
+			}
+		}
+
+		if (e.hasComponent<CAttacking>())
+		{
+			if (m_currentFrame - e.getComponent<CAttacking>().started > e.getComponent<CAttacking>().duration)
+			{
+				e.getComponent<CAttacking>().isAttacking = false;
+				e.getComponent<CTransform>().velocity.x = 0;
+				e.getComponent<CState>().state = "IDLE";
+
+				if (m_currentFrame - e.getComponent<CAttacking>().started > e.getComponent<CAttacking>().duration + e.getComponent<CAttacking>().coolDown)
+				{
+					e.getComponent<CAttacking>().canAttack = true;
+				}
 			}
 		}
 	}
@@ -241,6 +265,27 @@ void Scene_Play::sCamera()
 	}
 	view.setCenter({ windowCenterX, windowCenterY });
 	m_game->window().setView(view);
+}
+
+void Scene_Play::sEnemyLogic()
+{
+	// default speed of an enemy attack for now until I update the config
+	float atkSpeed = 0.0f;
+	for (auto e : m_entityManager.getEntities("Enemy"))
+	{
+		if (e.hasComponent<CAttacking>())
+		{
+			e.getComponent<CAttacking>().isInReach = (abs(m_player.getComponent<CTransform>().pos.x - e.getComponent<CTransform>().pos.x) < m_game->window().getView().getSize().x * 0.80f);
+			if (e.getComponent<CAttacking>().isInReach && e.getComponent<CAttacking>().canAttack)
+			{
+				e.getComponent<CTransform>().scale.x = (m_player.getComponent<CTransform>().pos.x < e.getComponent<CTransform>().pos.x) ? 1 : -1;
+				e.getComponent<CAttacking>().canAttack = false;
+				e.getComponent<CAttacking>().started = m_currentFrame;
+				e.getComponent<CTransform>().velocity.x = 10 * -(e.getComponent<CTransform>().scale.x);
+				e.getComponent<CState>().state = "RUSH";
+			}
+		}
+	}
 }
 
 void Scene_Play::sStatus()
@@ -293,6 +338,11 @@ void Scene_Play::sStatus()
 					// TODO
 					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerClimb");
 				}
+				else if (e.getComponent<CState>().state == "DEAD")
+				{
+					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerDead");
+				}
 			}
 			else if (e.tag() == "Bullet")
 			{
@@ -309,6 +359,23 @@ void Scene_Play::sStatus()
 				{
 					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("GroundDead");
 					e.getComponent<CAnimation>().repeat = false;
+				}
+			}
+			else if (e.tag() == "Enemy")
+			{
+				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getName() != "EnemyDead")
+				{
+					// TODO: Create enemy death animation
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
+					e.getComponent<CAnimation>().repeat = false;
+				}
+				else if (e.getComponent<CState>().state == "RUSH" && e.getComponent<CAnimation>().animation.getName() != "EnemyRunnerRush")
+				{
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("EnemyRunnerRush");
+				}
+				else if (e.getComponent<CState>().state == "IDLE" && e.getComponent<CAnimation>().animation.getName() != "EnemyRunnerIdle")
+				{
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("EnemyRunnerIdle");
 				}
 			}
 		}
@@ -393,6 +460,11 @@ void Scene_Play::sMovement()
 			{
 				e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
 			}
+		}
+
+		if (e.tag() == "Enemy" && e.hasComponent<CAttacking>())
+		{
+			e.getComponent<CTransform>().pos += e.getComponent<CTransform>().velocity;
 		}
 
 		// Cap entities speed in all directions using player's max speed (ideally entities should have their own max speed)
@@ -574,7 +646,6 @@ void Scene_Play::sDoAction(const Action& action)
 			{
 				if (e.hasComponent<CDraggable>() && Physics::IsInside(worldPos, e))
 				{
-					std::cout << "CLICKED ON ENTITY: " << e.getComponent<CAnimation>().animation.getName() << std::endl;
 					e.getComponent<CDraggable>().dragging = !e.getComponent<CDraggable>().dragging;
 				}
 			}
@@ -729,7 +800,6 @@ void Scene_Play::sRender()
 		}
 	}
 
-	// Draw the grid so that students can easily debug
 	if (m_drawGrid)
 	{
 		float leftX = m_game->window().getView().getCenter().x - width() / 2;
@@ -761,7 +831,6 @@ void Scene_Play::sRender()
 	Vec2 worldPos = windowToWorld(m_mPos);
 	m_mouseShape.setPosition({ worldPos.x, worldPos.y });
 	m_game->window().draw(m_mouseShape);
-	m_currentFrame++;
 }
 
 void Scene_Play::onEnd()

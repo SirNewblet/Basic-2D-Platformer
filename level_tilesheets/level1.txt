@@ -4,6 +4,6 @@ Tile UnderGround
 Destroyable DestroyableGround
 Destroyable DestroyableUnderGround
 Ladder LadderBone
-Enemy EnemyRunner
+Enemy EnemyRunnerIdle
 Decoration NonEnemyTreeNew
 Decoration LampBasic
