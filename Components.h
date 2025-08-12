@@ -28,6 +28,7 @@ public:
 	bool isInReach = false;
 	int started = 0;
 	int duration = 0;
+	int coolDown = 0;
 	CAttacking() {};
 };
 
