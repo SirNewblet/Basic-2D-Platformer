@@ -19,6 +19,7 @@ protected:
 	std::string							m_levelPath;
 	std::string							m_lastAction;
 	PlayerConfig						m_playerConfig;
+	bool								m_gameOver = false;
 	bool								m_pIsOnGround = false;
 	bool								m_drawTextures = true;
 	bool								m_drawCollision = false;
