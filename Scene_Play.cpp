@@ -124,7 +124,7 @@ void Scene_Play::loadLevel(const std::string& filename)
 			enemy.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, enemy);
 			enemy.getComponent<CTransform>().pos.y += enemy.getComponent<CAnimation>().animation.getSize().y * 0.15f;
 			enemy.addComponent<CState>("ALIVE");
-			enemy.addComponent<CHealth>(100);
+			enemy.addComponent<CHealth>(1000);
 			enemy.addComponent<CAttacking>();
 			enemy.getComponent<CAttacking>().coolDown = 180;
 			enemy.getComponent<CAttacking>().duration = 64;
@@ -171,27 +171,47 @@ void Scene_Play::spawnBullet(Entity entity)
 	bullet.addComponent<CBoundingBox>(bullet.getComponent<CAnimation>().animation.getSize() * 0.90f);
 	bullet.addComponent<CDamage>(10);
 	bullet.addComponent<CState>("ALIVE");
-	bullet.addComponent<CLifespan>(600, m_currentFrame);
+	bullet.addComponent<CLifespan>(180, m_currentFrame);
 }
 
 void Scene_Play::update()
 {
-	m_entityManager.update();
-
-	if (!m_paused)
+	for (auto e : m_entityManager.getEntities("Enemy"))
 	{
-		//sDragAndDrop();
-		sLifespan();
-		sMovement();
-		sEnemyLogic();
-		sCollision();
-		sStatus();
-		sAnimation();
-		sCamera();
-		m_currentFrame++;
+		if (e.isActive())
+		{
+			m_gameOver = false;
+			break;
+		}
 	}
 
-	sRender();
+	if (!m_gameOver)
+	{
+		if (!m_paused)
+		{
+			m_entityManager.update();
+			//sDragAndDrop();
+			sLifespan();
+			sMovement();
+			sEnemyLogic();
+			sCollision();
+			sStatus();
+			sAnimation();
+			sCamera();
+			m_currentFrame++;
+		}
+
+		sRender();
+		m_gameOver = true;
+	}
+	else
+	{
+		// Player has defeated all enemies
+		// TODO: Save player progress (next level unlocked)
+
+
+		std::cout << "Game Over.\n";
+	}
 }
 
 void Scene_Play::sDragAndDrop()
