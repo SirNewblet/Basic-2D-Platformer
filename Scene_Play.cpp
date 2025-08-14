@@ -94,10 +94,11 @@ void Scene_Play::loadLevel(const std::string& filename)
 				{
 					entity.addComponent<CRayCaster>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y - entity.getComponent<CAnimation>().animation.getSize().y / 2));
 					float x1, x2, y;
-					x1 = entity.getComponent<CRayCaster>().source.x - (entity.getComponent<CAnimation>().animation.getSize().x * 2);
-					x2 = entity.getComponent<CRayCaster>().source.x + (entity.getComponent<CAnimation>().animation.getSize().x * 2);
+					x1 = entity.getComponent<CRayCaster>().source.x - (entity.getComponent<CAnimation>().animation.getSize().x);
+					x2 = entity.getComponent<CRayCaster>().source.x + (entity.getComponent<CAnimation>().animation.getSize().x);
 					y = entity.getComponent<CTransform>().pos.y + entity.getComponent<CAnimation>().animation.getSize().y / 2;
 					entity.getComponent<CRayCaster>().targets = { Vec2(x1, y), Vec2(x2, y) };
+					entity.getComponent<CRayCaster>().maxRange = m_game->window().getSize().x;
 				}
 			}
 			if (item == "Tile" || item == "Destroyable")
@@ -208,7 +209,6 @@ void Scene_Play::update()
 			m_currentFrame++;
 		}
 
-		sRayCast();
 		sRender();
 		m_gameOver = true;
 	}
@@ -817,7 +817,7 @@ void Scene_Play::sRender()
 				m_game->window().draw(animation.getSprite());
 			}
 		}
-
+		sRayCast();
 		sDisplayHealth();
 	}
 
