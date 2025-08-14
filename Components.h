@@ -142,6 +142,22 @@ public:
 	{ }
 };
 
+class CRayCaster : public Component
+{
+public:
+	Vec2 source = { 0.0, 0.0 };
+	std::vector<Vec2> targets;
+	float maxRange = 0;
+	float angle = 0;
+	bool drawBetween = false;
+	bool drawLine = true;
+	
+	CRayCaster() {};
+	CRayCaster(Vec2 origin) : source(origin) {};
+	CRayCaster(Vec2 origin, std::vector<Vec2> endPoints) :
+		source(origin), targets(endPoints) {}
+};
+
 class CState : public Component
 {
 public:

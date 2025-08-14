@@ -85,11 +85,20 @@ void Scene_Play::loadLevel(const std::string& filename)
 			auto entity = m_entityManager.addEntity(item);
 			entity.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
 			entity.addComponent<CTransform>();
+			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, entity);
 			entity.addComponent<CDraggable>();
 			if (item == "Decoration")
 			{
 				// TODO: replace hard-coded values with values from the config (OR - draw decorations in the correct pixel scale)
-				//entity.getComponent<CTransform>().scale = { 5.0, 7.0 };
+				if (entity.getComponent<CAnimation>().animation.getName() == "LampBasic")
+				{
+					entity.addComponent<CRayCaster>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y - entity.getComponent<CAnimation>().animation.getSize().y / 2));
+					float x1, x2, y;
+					x1 = entity.getComponent<CRayCaster>().source.x - (entity.getComponent<CAnimation>().animation.getSize().x * 2);
+					x2 = entity.getComponent<CRayCaster>().source.x + (entity.getComponent<CAnimation>().animation.getSize().x * 2);
+					y = entity.getComponent<CTransform>().pos.y + entity.getComponent<CAnimation>().animation.getSize().y / 2;
+					entity.getComponent<CRayCaster>().targets = { Vec2(x1, y), Vec2(x2, y) };
+				}
 			}
 			if (item == "Tile" || item == "Destroyable")
 			{
@@ -107,8 +116,6 @@ void Scene_Play::loadLevel(const std::string& filename)
 				entity.addComponent<CBoundingBox>(Vec2(entity.getComponent<CAnimation>().animation.getSize().x / 2.0f, entity.getComponent<CAnimation>().animation.getSize().y));
 				entity.addComponent<CClimbable>();
 			}
-
-			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, entity);
 		}
 		else if (item == "Enemy")
 		{
@@ -201,6 +208,7 @@ void Scene_Play::update()
 			m_currentFrame++;
 		}
 
+		sRayCast();
 		sRender();
 		m_gameOver = true;
 	}
@@ -768,6 +776,20 @@ void Scene_Play::sAnimation()
 			if (e.getComponent<CInvulnerable>().isInvulnerable)
 			{
 				// do shading of the current animation to show invulnverability
+			}
+		}
+	}
+}
+
+void Scene_Play::sRayCast()
+{
+	for (auto e : m_entityManager.getEntities())
+	{
+		if (e.hasComponent<CRayCaster>())
+		{
+			for (auto t : e.getComponent<CRayCaster>().targets)
+			{
+				drawLine(t, e.getComponent<CRayCaster>().source);
 			}
 		}
 	}

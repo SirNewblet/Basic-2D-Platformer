@@ -41,16 +41,17 @@ protected:
 	void spawnPlayer();
 	void spawnBullet(Entity entity);
 
-	void sDragAndDrop();
-	void sDoAction(const Action& action);
-	void sMovement();
-	void sStatus();
-	void sEnemyLogic();
 	void sAnimation();
-	void sDisplayHealth();
-	void sCollision();
-	void sLifespan();
 	void sCamera();
+	void sCollision();
+	void sDisplayHealth();
+	void sDoAction(const Action& action);
+	void sDragAndDrop();
+	void sEnemyLogic();
+	void sLifespan();
+	void sMovement();
+	void sRayCast();
+	void sStatus();
 
 public:
 	Scene_Play(GameEngine* gameEngine, const std::string& levelPath);
