@@ -1,0 +1,5 @@
+Player GridX GridY CollisionX CollisionY SpeedX SpeedY MaximumSpeed Gravity Health WeaponType 
+Enemy EnemyType AnimationName GridX GridY CollisionX CollisionY SpeedX SpeedY Health Damage AttackStyle AttackDelay AttackDuration Gravity 
+Tile AnimationName GridX GridY Visibility IsDestroyable IsDraggable 
+Ladder AnimationName GridX GridY Visibility IsDraggable 
+Decoration AnimationName GridX GridY Visibility 

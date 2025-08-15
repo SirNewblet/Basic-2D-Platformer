@@ -23,6 +23,8 @@ public:
 class CAttacking : public Component
 {
 public:
+	std::string attackType = "";
+	float attackRange = 0.0f;
 	bool canAttack = true;
 	bool isAttacking = false;
 	bool isInReach = false;

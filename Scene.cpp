@@ -55,6 +55,18 @@ void Scene::drawLine(const Vec2& p1, const Vec2& p2)
 	m_game->window().draw(line, 2, sf::PrimitiveType::Lines);
 }
 
+void Scene::drawTriangle(const Vec2& p1, const Vec2& p2, const Vec2& p3)
+{
+	sf::Vertex triangle[] =
+	{
+		{{p1.x, p1.y}},
+		{{p2.x, p2.y}},
+		{{p3.x, p3.y}}
+	};
+
+	m_game->window().draw(triangle, 1, sf::PrimitiveType::Triangles);
+}
+
 void Scene::simulate(const size_t frames)
 {
 	for (size_t i = 0; i < frames; i++)

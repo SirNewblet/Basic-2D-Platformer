@@ -279,8 +279,7 @@ Destroyable DestroyableUnderGround 37 2
 Destroyable DestroyableUnderGround 36 2 
 Destroyable DestroyableUnderGround 35 2 
 Destroyable DestroyableUnderGround 34 2 
-Enemy EnemyRunnerIdle 86 2 10 
-Player 1 5 48 48 8 -10 15 2 GUN 
+Enemy Boss EnemyRunnerIdle 86 2 64 64 0 0 1000 1 CUSTOM 180 64 0
 Tile Ground 85 1 
 Ladder LadderBone 58 9 
 Ladder LadderBone 58 7 
@@ -290,3 +289,5 @@ Ladder LadderBone 58 6
 Ladder LadderBone 58 8 
 Ladder LadderBone 58 3 
 Ladder LadderBone 58 2 
+Player 1 5 48 48 8 -10 15 2 5 GUN 
+Enemy Basic EnemyLaserEyeIdle 12 7 64 64 0 0 50 2 HITSCAN 360 120 0

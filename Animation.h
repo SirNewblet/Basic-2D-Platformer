@@ -23,6 +23,8 @@ public:
 	void update();
 	bool hasEnded() const;
 	const std::string& getName() const;
+	const std::string& getType() const;
+	const std::string& getEntityName();
 	const Vec2& getSize() const;
 	sf::Sprite& getSprite();
 	const sf::Sprite& getSprite() const;

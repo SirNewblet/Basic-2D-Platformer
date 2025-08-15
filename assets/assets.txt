@@ -15,6 +15,7 @@ Texture TexNonEnemyTreeNew images/NonEnemyTreeNew.png
 Texture TexHeartFull images/HeartFull.png
 Texture TexHeartEmpty images/HeartEmpty.png
 Texture TexLampBasic images/DecorationLampBasic.png
+Texture TexEnemyLaserEyeIdle images/EnemyLaserEyeIdle.png
 Animation BulletAlive TexBulletAlive 16 2
 Animation BulletDead TexBulletDead 10 2
 Animation PlayerIdle TexPlayerIdle 4 6
@@ -34,5 +35,6 @@ Animation NonEnemyTreeNew TexNonEnemyTreeNew 4 8
 Animation HeartFull TexHeartFull 1 0
 Animation HeartEmpty TexHeartEmpty 1 0
 Animation LampBasic TexLampBasic 1 0
+Animation EnemyLaserEyeIdle TexEnemyLaserEyeIdle 10 4
 Font Sooky fonts/sooky.ttf
 Font Alagard fonts/alagard.ttf

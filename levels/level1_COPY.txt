@@ -244,7 +244,6 @@ Tile UnderGround 82 0
 Decoration NonEnemyTreeNew 53 10 
 Tile Ground 83 1 
 Tile Ground 84 1 
-Tile Ground 85 1 
 Tile Ground 86 1 
 Tile Ground 87 1 
 Tile Ground 88 1 
@@ -280,5 +279,14 @@ Destroyable DestroyableUnderGround 37 2
 Destroyable DestroyableUnderGround 36 2 
 Destroyable DestroyableUnderGround 35 2 
 Destroyable DestroyableUnderGround 34 2 
-Player 1 5 48 48 8 -10 15 2 GUN 
 Enemy EnemyRunnerIdle 86 2 10 
+Player 1 5 48 48 8 -10 15 2 GUN 
+Tile Ground 85 1 
+Ladder LadderBone 58 9 
+Ladder LadderBone 58 7 
+Ladder LadderBone 58 5 
+Ladder LadderBone 58 4 
+Ladder LadderBone 58 6 
+Ladder LadderBone 58 8 
+Ladder LadderBone 58 3 
+Ladder LadderBone 58 2 

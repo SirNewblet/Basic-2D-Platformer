@@ -1,5 +1,8 @@
 #include "Animation.h"
+#include <cctype>
+#include <string>
 #include <cmath>
+#include <regex>
 
 Animation::Animation() : m_sprite(getDummyTexture()) {};
 
@@ -59,6 +62,48 @@ sf::Sprite& Animation::getSprite()
 const sf::Sprite& Animation::getSprite() const
 {
 	return m_sprite;
+}
+
+const std::string& Animation::getType() const
+{
+	std::smatch matches;
+	std::regex pattern("Run|Jump|Crouch|Idle|Dead|Rush|Shoot");
+
+	if (std::regex_search(getName(), matches, pattern))
+	{
+		std::string match = matches[0];
+		for (char& c : match)
+		{
+			c = std::toupper(static_cast<unsigned char>(c));
+		}
+
+		return match;
+	}
+	else
+	{
+		return "NO_MATCH";
+	}
+
+	return "";
+}
+
+const std::string& Animation::getEntityName()
+{
+	std::smatch matches;
+	// Removed "Run" from the pattern due to an enemy having the name "Runner" which was triggering the regex incorrectly
+	// This will be fixed once enums are implemented but for now we will handle this separately
+	std::regex pattern("^(.*?)(?=Jump|Crouch|Idle|Dead|Rush|Shoot)");
+
+	if (std::regex_search(getName(), matches, pattern))
+	{
+		return matches[0];
+	}
+	else
+	{
+		return "NO_MATCH";
+	}
+
+	return "";
 }
 
 bool Animation::hasEnded() const
