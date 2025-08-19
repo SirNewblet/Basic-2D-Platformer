@@ -1,40 +1,46 @@
-Texture TexBulletAlive images/BulletAlive.png
+Texture TexBulletIdle images/BulletIdle.png
 Texture TexBulletDead images/BulletDead.png
 Texture TexPlayerIdle images/PlayerIdle.png
 Texture TexPlayerJump images/PlayerJump.png
 Texture TexPlayerRun images/PlayerRun.png
-Texture TexGround images/Ground.png
+Texture TexGroundIdle images/GroundIdle.png
 Texture TexGroundDead images/GroundDead.png
 Texture TexLadderBone images/LadderBone.png
 Texture TexNonEnemyTree images/NonEnemyTree.png
-Texture TexEnemyRunnerIdle images/EnemyRunnerIdle.png
-Texture TexEnemyRunnerRush images/EnemyRunnerRush.png
-Texture TexGroundPurple images/GroundPurple.png
-Texture TexUnderGround images/UnderGround.png
+Texture TexEnemyCrawlerIdle images/EnemyCrawlerIdle.png
+Texture TexEnemyCrawlerRush images/EnemyCrawlerRush.png
+Texture TexEnemyCrawlerDead images/EnemyCrawlerDead.png
+Texture TexGroundPurpleIdle images/GroundPurpleIdle.png
+Texture TexUnderGroundIdle images/UnderGroundIdle.png
 Texture TexNonEnemyTreeNew images/NonEnemyTreeNew.png
 Texture TexHeartFull images/HeartFull.png
 Texture TexHeartEmpty images/HeartEmpty.png
 Texture TexLampBasic images/DecorationLampBasic.png
 Texture TexEnemyLaserEyeIdle images/EnemyLaserEyeIdle.png
-Animation BulletAlive TexBulletAlive 16 2
+Texture TexEnemyLaserEyeDead images/EnemyLaserEyeDead.png
+Animation BulletIdle TexBulletIdle 16 2
 Animation BulletDead TexBulletDead 10 2
 Animation PlayerIdle TexPlayerIdle 4 6
 Animation PlayerJump TexPlayerJump 8 4
 Animation PlayerRun TexPlayerRun 5 4
 Animation NonEnemyTree TexNonEnemyTree 4 8
-Animation Ground TexGround 1 0
-Animation DestroyableGround TexGround 1 0
-Animation DestroyableUnderGround TexUnderGround 1 0
-Animation GroundPurple TexGroundPurple 1 0
+Animation GroundIdle TexGroundIdle 1 0
+Animation DestroyableGroundIdle TexGroundIdle 1 0
+Animation DestroyableUnderGroundIdle TexUnderGroundIdle 1 0
+Animation GroundPurpleIdle TexGroundPurpleIdle 1 0
+Animation DestroyableGroundDead TexGroundDead 8 2
+Animation DestroyableUnderGroundDead TexGroundDead 8 2
 Animation GroundDead TexGroundDead 8 2
 Animation LadderBone TexLadderBone 1 0
-Animation EnemyRunnerIdle TexEnemyRunnerIdle 8 8
-Animation EnemyRunnerRush TexEnemyRunnerRush 8 8
-Animation UnderGround TexUnderGround 1 0
+Animation EnemyCrawlerIdle TexEnemyCrawlerIdle 8 8
+Animation EnemyCrawlerRush TexEnemyCrawlerRush 8 8
+Animation EnemyCrawlerDead TexEnemyCrawlerDead 8 8
+Animation UnderGroundIdle TexUnderGroundIdle 1 0
 Animation NonEnemyTreeNew TexNonEnemyTreeNew 4 8
 Animation HeartFull TexHeartFull 1 0
 Animation HeartEmpty TexHeartEmpty 1 0
 Animation LampBasic TexLampBasic 1 0
-Animation EnemyLaserEyeIdle TexEnemyLaserEyeIdle 10 4
+Animation EnemyLaserEyeIdle TexEnemyLaserEyeIdle 10 12
+Animation EnemyLaserEyeDead TexEnemyLaserEyeDead 10 8
 Font Sooky fonts/sooky.ttf
 Font Alagard fonts/alagard.ttf

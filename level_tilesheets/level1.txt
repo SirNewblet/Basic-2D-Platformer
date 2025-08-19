@@ -1,10 +1,10 @@
 Player PlayerIdle
-Tile Ground
-Tile UnderGround
-Destroyable DestroyableGround
-Destroyable DestroyableUnderGround
+Tile GroundIdle 
+Tile UnderGroundIdle
+Destroyable DestroyableGroundIdle
+Destroyable DestroyableUnderGroundIdle
 Ladder LadderBone
-Enemy EnemyRunnerIdle
+Enemy EnemyCrawlerIdle
 Enemy EnemyLaserEyeIdle
 Decoration NonEnemyTreeNew
 Decoration LampBasic

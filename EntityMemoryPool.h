@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-static const size_t MAX_ENTITIES = 1000000;
+static const size_t MAX_ENTITIES = 100000;
 
 typedef std::tuple<
 	std::vector<CAnimation>,

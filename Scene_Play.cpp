@@ -167,17 +167,18 @@ void Scene_Play::spawnEnemy(EnemyConfig& enemy)
 {
 	auto entity = m_entityManager.addEntity("Enemy");
 	entity.addComponent<CState>("ALIVE");
-
 	entity.addComponent<CAnimation>(m_game->assets().getAnimation(enemy.animationName), true);
 	entity.addComponent<CTransform>();
 	entity.getComponent<CTransform>().pos = gridToMidPixel(enemy.gridX, enemy.gridY, entity);
-	entity.addComponent<CBoundingBox>(Vec2(enemy.collisionX, enemy.collisionY));
+	entity.getComponent<CTransform>().pos.y += (enemy.collisionY * 0.25f);
+	entity.addComponent<CBoundingBox>(Vec2(enemy.collisionX * 0.75f, enemy.collisionY * 0.75f));
 	entity.addComponent<CHealth>(enemy.health);
 	entity.addComponent<CDamage>(enemy.damage);
 	entity.addComponent<CAttacking>();
 	entity.getComponent<CAttacking>().attackType = enemy.attackType;
 	entity.getComponent<CAttacking>().coolDown = enemy.attackDelay;
 	entity.getComponent<CAttacking>().duration = enemy.attackDuration;
+	entity.addComponent<CGravity>().gravity = enemy.gravity;
 
 	if (entity.getComponent<CAttacking>().attackType == "HITSCAN")
 	{
@@ -205,7 +206,7 @@ void Scene_Play::spawnBullet(Entity entity)
 	bullet.addComponent<CTransform>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y));
 	bullet.getComponent<CTransform>().scale = entity.getComponent<CTransform>().scale;
 	bullet.getComponent<CTransform>().velocity.x = bullet.getComponent<CTransform>().scale.x * 15;
-	bullet.addComponent<CAnimation>(m_game->assets().getAnimation("BulletAlive"), true);
+	bullet.addComponent<CAnimation>(m_game->assets().getAnimation("BulletIdle"), true);
 	bullet.addComponent<CBoundingBox>(bullet.getComponent<CAnimation>().animation.getSize() * 0.90f);
 	bullet.addComponent<CDamage>(10);
 	bullet.addComponent<CState>("ALIVE");
@@ -286,7 +287,7 @@ void Scene_Play::sLifespan()
 			}
 		}
 
-		if (e.hasComponent<CAttacking>())
+		if (e.hasComponent<CAttacking>() && e.getComponent<CState>().state != "DEAD")
 		{
 			if (m_currentFrame - e.getComponent<CAttacking>().started > e.getComponent<CAttacking>().duration)
 			{
@@ -332,10 +333,9 @@ void Scene_Play::sEnemyLogic()
 		if (e.hasComponent<CAttacking>())
 		{
 			e.getComponent<CAttacking>().isInReach = (abs(m_player.getComponent<CTransform>().pos.x - e.getComponent<CTransform>().pos.x) < m_game->window().getView().getSize().x * 0.60f);
-
+			e.getComponent<CTransform>().scale.x = (m_player.getComponent<CTransform>().pos.x < e.getComponent<CTransform>().pos.x) ? 1 : -1;
 			if (e.getComponent<CAttacking>().isInReach && e.getComponent<CAttacking>().canAttack)
 			{
-				e.getComponent<CTransform>().scale.x = (m_player.getComponent<CTransform>().pos.x < e.getComponent<CTransform>().pos.x) ? 1 : -1;
 				e.getComponent<CAttacking>().canAttack = false;
 				e.getComponent<CAttacking>().started = m_currentFrame;
 
@@ -382,75 +382,57 @@ void Scene_Play::sStatus()
 	{
 		if (e.hasComponent<CState>())
 		{
-			if (e.tag() == "Player")
+			try
 			{
-				if (e.getComponent<CState>().state == "IDLE" && e.getComponent<CAnimation>().animation.getName() != "PlayerIdle")
+				if (e.getComponent<CState>().state == "RUSH" && e.getComponent<CAnimation>().animation.getType() != "RUSH")
 				{
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerIdle");
-				}
-				else if (e.getComponent<CState>().state == "JUMPING" && e.getComponent<CAnimation>().animation.getName() != "PlayerJump")
-				{
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerJump" );
-				}
-				else if (e.getComponent<CState>().state == "RUNNING" && e.getComponent<CAnimation>().animation.getName() != "PlayerRun")
-				{
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerRun");
-				}
-				else if (e.getComponent<CState>().state == "SHOOTING")
-				{
-					// TODO
-					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerShoot");
-				}
-				else if (e.getComponent<CState>().state == "CROUCHING")
-				{
-					// TODO
-					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerCrouch");
-				}
-				else if (e.getComponent<CState>().state == "CLIMBING")
-				{
-					// TODO
-					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerClimb");
-				}
-				else if (e.getComponent<CState>().state == "DEAD")
-				{
-					// TODO
-					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("PlayerDead");
-				}
-			}
-			else if (e.tag() == "Bullet")
-			{
-				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getName() != "BulletDead")
-				{
-					e.getComponent<CTransform>().velocity = Vec2(0, 0);
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
-					e.getComponent<CAnimation>().repeat = false;
-				}
-			}
-			else if (e.tag() == "Tile" || e.tag() == "Destroyable")
-			{
-				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getName() != "GroundDead")
-				{
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("GroundDead");
-					e.getComponent<CAnimation>().repeat = false;
-				}
-			}
-			else if (e.tag() == "Enemy")
-			{
-				if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getType() != "DEAD")
-				{
-					// TODO: Create enemy death animation
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
-					e.getComponent<CAnimation>().repeat = false;
-				}
-				else if (e.getComponent<CState>().state == "RUSH" && e.getComponent<CAnimation>().animation.getType() != "RUSH")
-				{
-					e.getComponent<CAnimation>().animation.getName();
-					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("EnemyRunnerRush");
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Rush");
 				}
 				else if (e.getComponent<CState>().state == "IDLE" && e.getComponent<CAnimation>().animation.getType() != "IDLE")
 				{
 					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Idle");
 				}
+				else if (e.getComponent<CState>().state == "SHOOTING" && e.getComponent<CAnimation>().animation.getType() != "SHOOT")
+				{
+					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Shoot");
+				}
+				else if (e.getComponent<CState>().state == "CROUCHING" && e.getComponent<CAnimation>().animation.getType() != "CROUCH")
+				{
+					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Crouch");
+				}
+				else if (e.getComponent<CState>().state == "CLIMBING" && e.getComponent<CAnimation>().animation.getType() != "CLIMB")
+				{
+					// TODO
+					//e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Climb");
+				}
+				else if (e.getComponent<CState>().state == "JUMPING" && e.getComponent<CAnimation>().animation.getType() != "JUMP")
+				{
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Jump");
+				}
+				else if (e.getComponent<CState>().state == "RUNNING" && e.getComponent<CAnimation>().animation.getType() != "RUN")
+				{
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Run");
+				}
+				else if (e.getComponent<CState>().state == "DEAD" && e.getComponent<CAnimation>().animation.getType() != "DEAD")
+				{
+					// TODO: Create enemy death animation
+					e.getComponent<CAnimation>().animation = m_game->assets().getAnimation(e.getComponent<CAnimation>().animation.getEntityName() + "Dead");
+					e.getComponent<CAnimation>().repeat = false;
+					if (e.hasComponent<CTransform>())
+					{
+						e.getComponent<CTransform>().velocity = Vec2(0, 0);
+					}
+					if (e.hasComponent<CBoundingBox>())
+					{
+						e.getComponent<CBoundingBox>() = Vec2(0, 0);
+					}
+				}
+			}
+			catch (const std::exception& ex)
+			{
+				e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
 			}
 		}
 	}
@@ -638,13 +620,11 @@ void Scene_Play::sCollision()
 			if ((overlap.x > 0 && overlap.y > 0) && b.getComponent<CState>().state != "DEAD")
 			{
 				b.getComponent<CState>().state = "DEAD";
-				b.destroy();
 				e.getComponent<CHealth>().currentHealth -= b.getComponent<CDamage>().damage;
 
 				if (e.getComponent<CHealth>().currentHealth <= 0)
 				{
 					e.getComponent<CState>().state = "DEAD";
-					//e.destroy();
 				}
 			}
 		}
@@ -752,7 +732,9 @@ void Scene_Play::sDisplayHealth()
 	{
 		if (e.tag() == "Enemy" && e.hasComponent<CHealth>())
 		{
-			if (e.getComponent<CHealth>().currentHealth < e.getComponent<CHealth>().maxHealth && e.getComponent<CState>().state != "DEAD")
+			if (e.getComponent<CHealth>().currentHealth < e.getComponent<CHealth>().maxHealth 
+				&& e.getComponent<CState>().state != "DEAD" 
+				&& e.getComponent<CHealth>().currentHealth > 0)
 			{
 				auto entTrans = e.getComponent<CTransform>();
 				auto entSize = e.getComponent<CAnimation>().animation.getSize();
