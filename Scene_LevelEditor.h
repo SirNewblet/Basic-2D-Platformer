@@ -15,6 +15,13 @@ class Scene_LevelEditor : public Scene
 		std::string WEAPON;
 	};
 
+	struct EnemyConfig
+	{
+		float gridX = 0, gridY = 0, collisionX = 0, collisionY = 0, speedX = 0, speedY = 0, gravity = 0;
+		int health = 0, damage = 0, attackDelay = 0;
+		std::string enemyType, animationName, attackType;
+	};
+
 protected:
 	Entity								m_player;
 	EntityManager						m_entityPoolManager;
@@ -46,6 +53,7 @@ protected:
 
 	void spawnPoolBackground(sf::RectangleShape& bg);
 	void spawnPlayer();
+	void spawnEnemy(EnemyConfig& enemyConfig);
 	void spawnBullet(Entity entity);
 
 	void sDragAndDrop();

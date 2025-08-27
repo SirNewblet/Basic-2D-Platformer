@@ -1,4 +1,3 @@
-Tile GroundIdle 0 0 
 Tile GroundIdle 1 0 
 Tile GroundIdle 2 0 
 Tile GroundIdle 3 0 
@@ -57,7 +56,6 @@ Tile UnderGroundIdle 14 0
 Tile UnderGroundIdle 15 0 
 Tile UnderGroundIdle 16 0 
 Tile UnderGroundIdle 17 0 
-Decoration LampBasic 2 1 
 Decoration LampBasic 7 1 
 Decoration LampBasic 18 1 
 Decoration NonEnemyTreeNew 23 1 
@@ -288,6 +286,7 @@ Ladder LadderBone 58 6
 Ladder LadderBone 58 8 
 Ladder LadderBone 58 3 
 Ladder LadderBone 58 2 
-Player 1 5 48 48 8 -10 15 2 5 GUN 
-Enemy Boss EnemyCrawlerIdle 86 2 256 256 0 0 1000 1 CUSTOM 180 64 0
-Enemy Basic EnemyLaserEyeIdle 12 7 64 64 0 0 50 2 HITSCAN 360 120 0
+Player 1 5 48 48 8 -10 15 2 5 GUN
+Tile GroundIdle 0 0 
+Enemy Boss EnemyCrawlerIdle 84 2 200 200 0 0 1000 1 CUSTOM 180 0 
+Enemy Basic EnemyLaserEyeIdle 12 7 48 48 0 0 100 1 HITSCAN 60 0 

@@ -71,6 +71,16 @@ public:
 	CDraggable() {};
 };
 
+class CEnemyType : public Component
+{
+public:
+	std::string type = "";
+	CEnemyType() {};
+	CEnemyType(std::string name) :
+		type(name)
+	{ };
+};
+
 class CGravity : public Component
 {
 public:

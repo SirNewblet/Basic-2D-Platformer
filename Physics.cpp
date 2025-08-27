@@ -1,4 +1,5 @@
 #include "Physics.h"
+#include <iostream>
 
 bool Physics::IsInside(Vec2& pos, Entity e)
 {

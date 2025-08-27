@@ -16,6 +16,7 @@ typedef std::tuple<
 	std::vector<CDamage>,
 	std::vector<CDestroyable>,
 	std::vector<CDraggable>,
+	std::vector<CEnemyType>,
 	std::vector<CGravity>,
 	std::vector<CGridLocation>,
 	std::vector<CHealth>,

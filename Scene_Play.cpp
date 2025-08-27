@@ -125,7 +125,6 @@ void Scene_Play::loadLevel(const std::string& filename)
 				>> enemyConfig.damage
 				>> enemyConfig.attackType
 				>> enemyConfig.attackDelay
-				>> enemyConfig.attackDuration
 				>> enemyConfig.gravity;
 
 			spawnEnemy(enemyConfig);
@@ -177,7 +176,6 @@ void Scene_Play::spawnEnemy(EnemyConfig& enemy)
 	entity.addComponent<CAttacking>();
 	entity.getComponent<CAttacking>().attackType = enemy.attackType;
 	entity.getComponent<CAttacking>().coolDown = enemy.attackDelay;
-	entity.getComponent<CAttacking>().duration = enemy.attackDuration;
 	entity.addComponent<CGravity>().gravity = enemy.gravity;
 
 	if (entity.getComponent<CAttacking>().attackType == "HITSCAN")

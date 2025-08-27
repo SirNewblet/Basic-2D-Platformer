@@ -101,18 +101,24 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 		}
 		else if (item == "Enemy")
 		{
-			int tileGX = 0, tileGY = 0, damage = 0;
-			std::string name;
+			EnemyConfig enemyConfig;
 
-			fin >> name >> tileGX >> tileGY >> damage;
+			fin
+				>> enemyConfig.enemyType
+				>> enemyConfig.animationName
+				>> enemyConfig.gridX
+				>> enemyConfig.gridY
+				>> enemyConfig.collisionX
+				>> enemyConfig.collisionY
+				>> enemyConfig.speedX
+				>> enemyConfig.speedY
+				>> enemyConfig.health
+				>> enemyConfig.damage
+				>> enemyConfig.attackType
+				>> enemyConfig.attackDelay
+				>> enemyConfig.gravity;
 
-			auto entity = m_entityManager.addEntity(item);
-			entity.addComponent<CAnimation>(m_game->assets().getAnimation(name), true);
-			entity.addComponent<CDamage>(damage);
-			entity.addComponent<CTransform>();
-			entity.getComponent<CTransform>().pos = gridToMidPixel(tileGX, tileGY, entity);
-			entity.addComponent<CDraggable>();
-			entity.addComponent<CGridLocation>(tileGX, tileGY);
+			spawnEnemy(enemyConfig);
 		}
 		else if (item == "Player")
 		{
@@ -214,11 +220,20 @@ void Scene_LevelEditor::saveLevel(const std::string& levelPath)
 				{
 					fout << 
 						e.tag() << " " << 
+						e.getComponent<CEnemyType>().type << " " << 
 						e.getComponent<CAnimation>().animation.getName() << " " << 
 						e.getComponent<CGridLocation>().x << " " << 
 						e.getComponent<CGridLocation>().y << " " <<
+						e.getComponent<CBoundingBox>().size.x << " " <<
+						e.getComponent<CBoundingBox>().size.y << " " << 
+						e.getComponent<CTransform>().velocity.x << " " << 
+						e.getComponent<CTransform>().velocity.y << " " <<
+						e.getComponent<CHealth>().maxHealth << " " <<
+						e.getComponent<CDamage>().damage << " " <<
+						e.getComponent<CAttacking>().attackType << " " << 
+						e.getComponent<CAttacking>().coolDown << " " << 
+						e.getComponent<CGravity>().gravity << " " <<
 						int(e.getComponent<CDamage>().damage) << " \n";
-
 				}
 				if (e.tag() == "Tile" || e.tag() == "Decoration" || e.tag() == "Ladder" || e.tag() == "Destroyable")
 				{
@@ -245,6 +260,26 @@ void Scene_LevelEditor::saveLevel(const std::string& levelPath)
 	}
 }
 
+void Scene_LevelEditor::spawnEnemy(EnemyConfig& enemy)
+{
+	auto entity = m_entityManager.addEntity("Enemy");
+	entity.addComponent<CState>("ALIVE");
+	entity.addComponent<CAnimation>(m_game->assets().getAnimation(enemy.animationName), true);
+	entity.addComponent<CEnemyType>(enemy.enemyType);
+	entity.addComponent<CTransform>();
+	entity.addComponent<CGridLocation>();
+	entity.getComponent<CGridLocation>().x = enemy.gridX;
+	entity.getComponent<CGridLocation>().y = enemy.gridY;
+	entity.getComponent<CTransform>().pos = gridToMidPixel(enemy.gridX, enemy.gridY, entity);
+	entity.addComponent<CBoundingBox>(Vec2(enemy.collisionX, enemy.collisionY));
+	entity.addComponent<CHealth>(enemy.health);
+	entity.addComponent<CDamage>(enemy.damage);
+	entity.addComponent<CAttacking>();
+	entity.getComponent<CAttacking>().attackType = enemy.attackType;
+	entity.getComponent<CAttacking>().coolDown = enemy.attackDelay;
+	entity.addComponent<CGravity>().gravity = enemy.gravity;
+}
+
 void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 {
 	std::ifstream fin(tilesheet);
@@ -261,6 +296,20 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 			if (entityType == "Destroyable")
 			{
 				ne.addComponent<CDestroyable>();
+			}
+
+			// For any entity which is larger than 64 x 64 - we need to scale down to 64x64 for the tile pool
+			// to prevent any overlapping, which causes multiple entities to be picked up with one mouse click
+			if (ne.getComponent<CAnimation>().animation.getSize().y > 64 ||
+				ne.getComponent<CAnimation>().animation.getSize().x > 64)
+			{
+				float scaleX = 0.0f, scaleY = 0.0f;
+				scaleX = 1 / (ne.getComponent<CAnimation>().animation.getSize().x / 64);
+				scaleY = 1 / (ne.getComponent<CAnimation>().animation.getSize().y / 64);
+				ne.getComponent<CTransform>().scale = { scaleX, scaleY };
+
+				//ne.getComponent<CAnimation>().animation.getSprite().setScale(sf::Vector2f(scaleX, scaleY));
+				//ne.getComponent<CAnimation>().animation.getSprite().getGlobalBounds()
 			}
 		}
 	}
@@ -416,8 +465,8 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 							ne.addComponent<CGridLocation>();
 							if (ne.tag() == "Enemy")
 							{
-								// default a new enemy's damage to 10
-								ne.addComponent<CDamage>().damage = 10;
+								// default a new enemy's damage to 1
+								ne.addComponent<CDamage>().damage = 1;
 							}
 						}
 					}

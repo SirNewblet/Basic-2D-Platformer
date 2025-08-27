@@ -18,13 +18,8 @@ class Scene_Play : public Scene
 	struct EnemyConfig
 	{
 		float gridX = 0, gridY = 0, collisionX = 0, collisionY = 0, speedX = 0, speedY = 0, gravity = 0;
-		int health = 0, damage = 0, attackDelay = 0, attackDuration = 0;
+		int health = 0, damage = 0, attackDelay = 0;
 		std::string enemyType, animationName, attackType;
-	};
-
-	struct TileConfig
-	{
-
 	};
 
 protected:
@@ -33,7 +28,6 @@ protected:
 	std::string							m_lastAction;
 	PlayerConfig						m_playerConfig;
 	EnemyConfig							m_enemyConfig;
-	TileConfig							m_tileConfig;
 	bool								m_gameOver = false;
 	bool								m_pIsOnGround = false;
 	bool								m_drawTextures = true;
