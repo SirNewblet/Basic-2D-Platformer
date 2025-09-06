@@ -180,8 +180,8 @@ void Scene_Play::spawnEnemy(EnemyConfig& enemy)
 
 	if (entity.getComponent<CAttacking>().attackType == "HITSCAN")
 	{
-		entity.addComponent<CRayCaster>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y - entity.getComponent<CAnimation>().animation.getSize().y * 0.75f));
-		entity.getComponent<CRayCaster>().maxRange = m_game->window().getView().getSize().x;
+		entity.addComponent<CRayCaster>(Vec2(entity.getComponent<CTransform>().pos.x, entity.getComponent<CTransform>().pos.y));
+		entity.getComponent<CRayCaster>().maxRange = m_game->window().getView().getSize().x / 2;
 	}
 	else if (entity.getComponent<CAttacking>().attackType == "PROJECTILE")
 	{
@@ -320,6 +320,7 @@ void Scene_Play::sCamera()
 	{
 		windowCenterY += camYVelocity;
 	}
+
 	view.setCenter({ windowCenterX, windowCenterY });
 	m_game->window().setView(view);
 }
@@ -330,7 +331,7 @@ void Scene_Play::sEnemyLogic()
 	{
 		if (e.hasComponent<CAttacking>())
 		{
-			e.getComponent<CAttacking>().isInReach = (abs(m_player.getComponent<CTransform>().pos.x - e.getComponent<CTransform>().pos.x) < m_game->window().getView().getSize().x * 0.60f);
+			e.getComponent<CAttacking>().isInReach = (abs(m_player.getComponent<CTransform>().pos.x - e.getComponent<CTransform>().pos.x) < m_game->window().getView().getSize().x * 0.50f);
 			e.getComponent<CTransform>().scale.x = (m_player.getComponent<CTransform>().pos.x < e.getComponent<CTransform>().pos.x) ? 1 : -1;
 			if (e.getComponent<CAttacking>().isInReach && e.getComponent<CAttacking>().canAttack)
 			{
@@ -339,7 +340,8 @@ void Scene_Play::sEnemyLogic()
 
 				if (e.getComponent<CAttacking>().attackType == "HITSCAN")
 				{
-					e.getComponent<CState>().state = "CHARGE";
+					// Specify hitscan states here
+					e.getComponent<CRayCaster>().target = m_player.getComponent<CTransform>().pos;
 				}
 				else if (e.getComponent<CAttacking>().attackType == "PROJECTILE")
 				{
@@ -351,7 +353,9 @@ void Scene_Play::sEnemyLogic()
 				}
 				else if (e.getComponent<CAttacking>().attackType == "CUSTOM")
 				{
-					e.getComponent<CTransform>().velocity.x = 10 * -(e.getComponent<CTransform>().scale.x);
+					// Unsure of best way to implement custom enemy logic...
+					// Moves need to be timed and coordinated and bosses need "phases"
+					e.getComponent<CTransform>().velocity.x = 20 * -(e.getComponent<CTransform>().scale.x);
 					e.getComponent<CState>().state = "RUSH";
 				}
 			}
@@ -427,10 +431,16 @@ void Scene_Play::sStatus()
 						e.getComponent<CBoundingBox>() = Vec2(0, 0);
 					}
 				}
+
+				if (e.hasComponent<CAttacking>() && e.getComponent<CAnimation>().animation.getType() == "RUSH")
+				{
+					e.getComponent<CAttacking>().duration = e.getComponent<CAnimation>().animation.getDuration();
+				}
 			}
 			catch (const std::exception& ex)
 			{
 				e.getComponent<CAnimation>().animation = m_game->assets().getAnimation("BulletDead");
+				std::cout << ex.what() << std::endl;
 			}
 		}
 	}
@@ -514,11 +524,6 @@ void Scene_Play::sMovement()
 			{
 				e.getComponent<CTransform>().velocity.y += e.getComponent<CGravity>().gravity;
 			}
-		}
-
-		if (e.tag() == "Enemy" && e.hasComponent<CAttacking>())
-		{
-			e.getComponent<CTransform>().pos += e.getComponent<CTransform>().velocity;
 		}
 
 		// Cap entities speed in all directions using player's max speed (ideally entities should have their own max speed)
@@ -736,12 +741,12 @@ void Scene_Play::sDisplayHealth()
 			{
 				auto entTrans = e.getComponent<CTransform>();
 				auto entSize = e.getComponent<CAnimation>().animation.getSize();
-				auto rectBack = sf::RectangleShape({ entSize.x, entSize.y / 5.0f });
+				auto rectBack = sf::RectangleShape({ entSize.x, 16 });
 				rectBack.setFillColor(sf::Color::Red);
 				// set the position to the middle of the entity (x) and slightly above the entity (-10)
 				rectBack.setPosition({ entTrans.pos.x - (entSize.x / 2), entTrans.pos.y - (entSize.y / 2) - 10});
 
-				auto rectFront = sf::RectangleShape({ entSize.x * (e.getComponent<CHealth>().currentHealth / e.getComponent<CHealth>().maxHealth), entSize.y / 5.0f });
+				auto rectFront = sf::RectangleShape({ entSize.x * (e.getComponent<CHealth>().currentHealth / e.getComponent<CHealth>().maxHealth), 16 });
 				rectFront.setFillColor(sf::Color::Green);
 				rectFront.setPosition({ rectBack.getPosition().x, rectBack.getPosition().y });
 
@@ -815,7 +820,15 @@ void Scene_Play::sRayCast()
 		{
 			for (auto t : e.getComponent<CRayCaster>().targets)
 			{
-				drawLine(e.getComponent<CRayCaster>().source, t);
+				if (e.getComponent<CRayCaster>().source.dist(t) < e.getComponent<CRayCaster>().maxRange)
+				{
+					drawLine(e.getComponent<CRayCaster>().source, t);
+				}
+			}
+
+			if (e.getComponent<CRayCaster>().source.dist(e.getComponent<CRayCaster>().target) < e.getComponent<CRayCaster>().maxRange)
+			{
+				drawLine(e.getComponent<CRayCaster>().source, e.getComponent<CRayCaster>().target);
 			}
 		}
 	}

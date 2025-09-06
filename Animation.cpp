@@ -44,6 +44,11 @@ void Animation::update()
 	}
 }
 
+const size_t Animation::getDuration() const
+{
+	return m_speed * m_frameCount;
+}
+
 const Vec2& Animation::getSize() const
 {
 	return m_size;

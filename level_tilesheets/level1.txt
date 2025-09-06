@@ -4,7 +4,7 @@ Tile UnderGroundIdle
 Destroyable DestroyableGroundIdle
 Destroyable DestroyableUnderGroundIdle
 Ladder LadderBone
-Enemy EnemyCrawlerIdle
-Enemy EnemyLaserEyeIdle
+Enemy Boss EnemyCrawlerIdle 84 2 200 200 0 0 1000 1 CUSTOM 180 0 
+Enemy Basic EnemyLaserEyeIdle 12 7 48 48 0 0 100 1 HITSCAN 60 0 
 Decoration NonEnemyTreeNew
 Decoration LampBasic

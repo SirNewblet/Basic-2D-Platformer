@@ -53,7 +53,7 @@ protected:
 
 	void spawnPoolBackground(sf::RectangleShape& bg);
 	void spawnPlayer();
-	void spawnEnemy(EnemyConfig& enemyConfig);
+	void spawnEnemy(EnemyConfig& enemyConfig, bool isPool);
 	void spawnBullet(Entity entity);
 
 	void sDragAndDrop();

@@ -28,6 +28,7 @@ public:
 	const Vec2& getSize() const;
 	sf::Sprite& getSprite();
 	const sf::Sprite& getSprite() const;
+	const size_t getDuration() const;
 
 	static sf::Texture& getDummyTexture();
 };

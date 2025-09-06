@@ -118,7 +118,7 @@ void Scene_LevelEditor::loadLevel(const std::string& filename)
 				>> enemyConfig.attackDelay
 				>> enemyConfig.gravity;
 
-			spawnEnemy(enemyConfig);
+			spawnEnemy(enemyConfig, false);
 		}
 		else if (item == "Player")
 		{
@@ -260,9 +260,9 @@ void Scene_LevelEditor::saveLevel(const std::string& levelPath)
 	}
 }
 
-void Scene_LevelEditor::spawnEnemy(EnemyConfig& enemy)
+void Scene_LevelEditor::spawnEnemy(EnemyConfig& enemy, bool isPool)
 {
-	auto entity = m_entityManager.addEntity("Enemy");
+	auto entity = isPool ? m_entityPoolManager.addEntity("Enemy") : m_entityManager.addEntity("Enemy");
 	entity.addComponent<CState>("ALIVE");
 	entity.addComponent<CAnimation>(m_game->assets().getAnimation(enemy.animationName), true);
 	entity.addComponent<CEnemyType>(enemy.enemyType);
@@ -278,6 +278,20 @@ void Scene_LevelEditor::spawnEnemy(EnemyConfig& enemy)
 	entity.getComponent<CAttacking>().attackType = enemy.attackType;
 	entity.getComponent<CAttacking>().coolDown = enemy.attackDelay;
 	entity.addComponent<CGravity>().gravity = enemy.gravity;
+	entity.addComponent<CDraggable>();
+
+	// For any entity which is larger than 64 x 64 - we need to scale down to 64x64 for the tile pool
+	// to prevent any overlapping, which causes multiple entities to be picked up with one mouse click
+	if (isPool)
+	{
+		float scaleX = 0.0f, scaleY = 0.0f;
+		scaleX = 1 / (entity.getComponent<CAnimation>().animation.getSize().x / 64);
+		scaleY = 1 / (entity.getComponent<CAnimation>().animation.getSize().y / 64);
+		entity.getComponent<CTransform>().scale = { scaleX, scaleY };
+
+		//ne.getComponent<CAnimation>().animation.getSprite().setScale(sf::Vector2f(scaleX, scaleY));
+		//ne.getComponent<CAnimation>().animation.getSprite().getGlobalBounds()
+	}
 }
 
 void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
@@ -289,13 +303,37 @@ void Scene_LevelEditor::loadTileSheet(const std::string& tilesheet)
 		std::string entityAnim = "";
 		while (fin >> entityType)
 		{
-			fin >> entityAnim;
 			auto ne = m_entityPoolManager.addEntity(entityType);
-			ne.addComponent<CAnimation>(m_game->assets().getAnimation(entityAnim), true);
-			ne.addComponent<CTransform>();
-			if (entityType == "Destroyable")
+			if (entityType == "Enemy")
 			{
-				ne.addComponent<CDestroyable>();
+				EnemyConfig enemyConfig;
+
+				fin
+					>> enemyConfig.enemyType
+					>> enemyConfig.animationName
+					>> enemyConfig.gridX
+					>> enemyConfig.gridY
+					>> enemyConfig.collisionX
+					>> enemyConfig.collisionY
+					>> enemyConfig.speedX
+					>> enemyConfig.speedY
+					>> enemyConfig.health
+					>> enemyConfig.damage
+					>> enemyConfig.attackType
+					>> enemyConfig.attackDelay
+					>> enemyConfig.gravity;
+
+				spawnEnemy(enemyConfig, true);
+			}
+			else
+			{
+				fin >> entityAnim;
+				ne.addComponent<CAnimation>(m_game->assets().getAnimation(entityAnim), true);
+				ne.addComponent<CTransform>();
+				if (entityType == "Destroyable")
+				{
+					ne.addComponent<CDestroyable>();
+				}
 			}
 
 			// For any entity which is larger than 64 x 64 - we need to scale down to 64x64 for the tile pool
@@ -465,8 +503,14 @@ void Scene_LevelEditor::sDoAction(const Action& action)
 							ne.addComponent<CGridLocation>();
 							if (ne.tag() == "Enemy")
 							{
-								// default a new enemy's damage to 1
-								ne.addComponent<CDamage>().damage = 1;
+								ne.addComponent<CEnemyType>(e.getComponent<CEnemyType>().type);
+								ne.addComponent<CBoundingBox>(Vec2(e.getComponent<CBoundingBox>().size));
+								ne.addComponent<CHealth>(e.getComponent<CHealth>().maxHealth);
+								ne.addComponent<CDamage>(e.getComponent<CDamage>().damage);
+								ne.addComponent<CAttacking>();
+								ne.getComponent<CAttacking>().attackType = e.getComponent<CAttacking>().attackType;
+								ne.getComponent<CAttacking>().coolDown = e.getComponent<CAttacking>().coolDown;
+								ne.addComponent<CGravity>().gravity = e.getComponent<CGravity>().gravity;
 							}
 						}
 					}

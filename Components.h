@@ -159,6 +159,7 @@ class CRayCaster : public Component
 public:
 	Vec2 source = { 0.0, 0.0 };
 	std::vector<Vec2> targets;
+	Vec2 target = { 0.0, 0.0 };
 	float maxRange = 0;
 	float angle = 0;
 	bool drawBetween = false;

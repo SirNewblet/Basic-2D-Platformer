@@ -59,8 +59,7 @@ Tile UnderGroundIdle 17 0
 Decoration LampBasic 7 1 
 Decoration LampBasic 18 1 
 Decoration NonEnemyTreeNew 23 1 
-Decoration NonEnemyTreeNew 32 7 
-Decoration NonEnemyTreeNew 37 8 
+Decoration NonEnemyTreeNew 27 10 
 Tile UnderGroundIdle 35 6 
 Tile UnderGroundIdle 36 6 
 Tile UnderGroundIdle 37 6 
@@ -239,7 +238,7 @@ Tile UnderGroundIdle 79 0
 Tile UnderGroundIdle 80 0 
 Tile UnderGroundIdle 81 0 
 Tile UnderGroundIdle 82 0 
-Decoration NonEnemyTreeNew 53 10 
+Decoration NonEnemyTreeNew 51 10 
 Tile GroundIdle 83 1 
 Tile GroundIdle 84 1 
 Tile GroundIdle 86 1 
@@ -247,7 +246,6 @@ Tile GroundIdle 87 1
 Tile GroundIdle 88 1 
 Tile GroundIdle 89 1 
 Tile GroundIdle 90 1 
-Tile GroundIdle 91 1 
 Tile UnderGroundIdle 91 0 
 Tile UnderGroundIdle 90 0 
 Tile UnderGroundIdle 89 0 
@@ -286,7 +284,30 @@ Ladder LadderBone 58 6
 Ladder LadderBone 58 8 
 Ladder LadderBone 58 3 
 Ladder LadderBone 58 2 
-Player 1 5 48 48 8 -10 15 2 5 GUN
 Tile GroundIdle 0 0 
-Enemy Boss EnemyCrawlerIdle 84 2 200 200 0 0 1000 1 CUSTOM 180 0 
-Enemy Basic EnemyLaserEyeIdle 12 7 48 48 0 0 100 1 HITSCAN 60 0 
+Enemy Basic EnemyLaserEyeIdle 12 7 48 48 0 0 100 1 HITSCAN 60 0 1 
+Enemy Basic EnemyLaserEyeIdle 17 2 48 48 0 0 100 1 HITSCAN 60 0 1 
+Enemy Basic EnemyLaserEyeIdle 25 10 48 48 0 0 100 1 HITSCAN 60 0 1 
+Decoration LampBasic 46 2 
+Enemy Basic EnemyLaserEyeIdle 56 10 48 48 0 0 100 1 HITSCAN 60 0 1 
+Enemy Boss EnemyCrawlerIdle 80 2 200 200 0 0 1000 1 CUSTOM 180 0 1 
+Decoration LampBasic 63 2 
+Decoration LampBasic 70 2 
+Decoration LampBasic 77 2 
+Decoration LampBasic 84 2 
+Tile UnderGroundIdle 91 1 
+Tile UnderGroundIdle 91 2 
+Enemy Basic EnemyLaserEyeIdle 39 8 48 48 0 0 100 1 HITSCAN 60 0 1 
+Enemy Basic EnemyLaserEyeIdle 33 7 48 48 0 0 100 1 HITSCAN 60 0 1 
+Player 1 5 48 48 8 -10 15 2 5 
+Tile UnderGroundIdle 91 3 
+Tile UnderGroundIdle 91 4 
+Tile UnderGroundIdle 91 5 
+Tile UnderGroundIdle 91 6 
+Tile UnderGroundIdle 91 7 
+Tile UnderGroundIdle 91 8 
+Tile UnderGroundIdle 91 9 
+Tile UnderGroundIdle 91 10 
+Tile UnderGroundIdle 91 11 
+Tile UnderGroundIdle 91 12 
+Tile UnderGroundIdle 91 13 
