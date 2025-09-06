@@ -1,5 +1,8 @@
 #include "Animation.h"
+#include <cctype>
+#include <string>
 #include <cmath>
+#include <regex>
 
 Animation::Animation() : m_sprite(getDummyTexture()) {};
 
@@ -41,6 +44,11 @@ void Animation::update()
 	}
 }
 
+const size_t Animation::getDuration() const
+{
+	return m_speed * m_frameCount;
+}
+
 const Vec2& Animation::getSize() const
 {
 	return m_size;
@@ -59,6 +67,46 @@ sf::Sprite& Animation::getSprite()
 const sf::Sprite& Animation::getSprite() const
 {
 	return m_sprite;
+}
+
+std::string Animation::getType() const
+{
+	std::smatch matches;
+	std::regex pattern("Run|Jump|Crouch|Idle|Dead|Rush|Shoot");
+
+	if (std::regex_search(m_name, matches, pattern))
+	{
+		std::string match = matches[0];
+		for (char& c : match)
+		{
+			c = std::toupper(static_cast<unsigned char>(c));
+		}
+
+		return match;
+	}
+	else
+	{
+		return "NO_MATCH";
+	}
+
+	return "";
+}
+
+std::string Animation::getEntityName()
+{
+	std::smatch matches;
+	std::regex pattern("^(.*?)(?=Run|Jump|Crouch|Idle|Dead|Rush|Shoot)");
+
+	if (std::regex_search(m_name, matches, pattern))
+	{
+		return matches[0];
+	}
+	else
+	{
+		return "NO_MATCH";
+	}
+
+	return "";
 }
 
 bool Animation::hasEnded() const

@@ -23,9 +23,12 @@ public:
 	void update();
 	bool hasEnded() const;
 	const std::string& getName() const;
+	std::string getType() const;
+	std::string getEntityName();
 	const Vec2& getSize() const;
 	sf::Sprite& getSprite();
 	const sf::Sprite& getSprite() const;
+	const size_t getDuration() const;
 
 	static sf::Texture& getDummyTexture();
 };

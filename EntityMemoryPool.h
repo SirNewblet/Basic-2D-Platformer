@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-static const size_t MAX_ENTITIES = 1000000;
+static const size_t MAX_ENTITIES = 100000;
 
 typedef std::tuple<
 	std::vector<CAnimation>,
@@ -16,12 +16,14 @@ typedef std::tuple<
 	std::vector<CDamage>,
 	std::vector<CDestroyable>,
 	std::vector<CDraggable>,
+	std::vector<CEnemyType>,
 	std::vector<CGravity>,
 	std::vector<CGridLocation>,
 	std::vector<CHealth>,
 	std::vector<CInput>,
 	std::vector<CInvulnerable>,
 	std::vector<CLifespan>,
+	std::vector<CRayCaster>,
 	std::vector<CState>,
 	std::vector<CTransform>> EntityComponentVectorTuple;
 

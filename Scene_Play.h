@@ -10,8 +10,16 @@ class Scene_Play : public Scene
 {
 	struct PlayerConfig
 	{
-		float gridX = 0, gridY = 0, collisionX = 0, collisionY = 0, speedX = 0, speedY = 0, maxSpeed = 0,  gravity = 0;
+		float gridX = 0, gridY = 0, collisionX = 0, collisionY = 0, speedX = 0, speedY = 0, maxSpeed = 0, gravity = 0;
+		int health = 0;
 		std::string WEAPON;
+	};
+
+	struct EnemyConfig
+	{
+		float gridX = 0, gridY = 0, collisionX = 0, collisionY = 0, speedX = 0, speedY = 0, gravity = 0;
+		int health = 0, damage = 0, attackDelay = 0;
+		std::string enemyType, animationName, attackType;
 	};
 
 protected:
@@ -19,6 +27,7 @@ protected:
 	std::string							m_levelPath;
 	std::string							m_lastAction;
 	PlayerConfig						m_playerConfig;
+	EnemyConfig							m_enemyConfig;
 	bool								m_gameOver = false;
 	bool								m_pIsOnGround = false;
 	bool								m_drawTextures = true;
@@ -39,18 +48,20 @@ protected:
 	void update();
 
 	void spawnPlayer();
+	void spawnEnemy(EnemyConfig& enemy);
 	void spawnBullet(Entity entity);
 
-	void sDragAndDrop();
-	void sDoAction(const Action& action);
-	void sMovement();
-	void sStatus();
-	void sEnemyLogic();
 	void sAnimation();
-	void sDisplayHealth();
-	void sCollision();
-	void sLifespan();
 	void sCamera();
+	void sCollision();
+	void sDisplayHealth();
+	void sDoAction(const Action& action);
+	void sDragAndDrop();
+	void sEnemyLogic();
+	void sLifespan();
+	void sMovement();
+	void sRayCast();
+	void sStatus();
 
 public:
 	Scene_Play(GameEngine* gameEngine, const std::string& levelPath);

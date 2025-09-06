@@ -23,6 +23,8 @@ public:
 class CAttacking : public Component
 {
 public:
+	std::string attackType = "";
+	float attackRange = 0.0f;
 	bool canAttack = true;
 	bool isAttacking = false;
 	bool isInReach = false;
@@ -67,6 +69,16 @@ class CDraggable : public Component
 public:
 	bool dragging = false;
 	CDraggable() {};
+};
+
+class CEnemyType : public Component
+{
+public:
+	std::string type = "";
+	CEnemyType() {};
+	CEnemyType(std::string name) :
+		type(name)
+	{ };
 };
 
 class CGravity : public Component
@@ -140,6 +152,23 @@ public:
 	CLifespan(int duration, int frame) :
 		lifespan(duration), frameCreated(frame) 
 	{ }
+};
+
+class CRayCaster : public Component
+{
+public:
+	Vec2 source = { 0.0, 0.0 };
+	std::vector<Vec2> targets;
+	Vec2 target = { 0.0, 0.0 };
+	float maxRange = 0;
+	float angle = 0;
+	bool drawBetween = false;
+	bool drawLine = true;
+	
+	CRayCaster() {};
+	CRayCaster(Vec2 origin) : source(origin) {};
+	CRayCaster(Vec2 origin, std::vector<Vec2> endPoints) :
+		source(origin), targets(endPoints) {}
 };
 
 class CState : public Component
