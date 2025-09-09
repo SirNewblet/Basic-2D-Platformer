@@ -288,6 +288,7 @@ void Scene_LevelEditor::spawnEnemy(EnemyConfig& enemy, bool isPool)
 		scaleX = 1 / (entity.getComponent<CAnimation>().animation.getSize().x / 64);
 		scaleY = 1 / (entity.getComponent<CAnimation>().animation.getSize().y / 64);
 		entity.getComponent<CTransform>().scale = { scaleX, scaleY };
+		//entity.getComponent<CAnimation>().animation.getSprite().setScale({ scaleX, scaleY });
 
 		//ne.getComponent<CAnimation>().animation.getSprite().setScale(sf::Vector2f(scaleX, scaleY));
 		//ne.getComponent<CAnimation>().animation.getSprite().getGlobalBounds()
