@@ -299,9 +299,6 @@ Tile UnderGroundIdle 91 1
 Tile UnderGroundIdle 91 2 
 Enemy Basic EnemyLaserEyeIdle 39 8 48 48 0 0 100 1 HITSCAN 60 0 1 
 Enemy Basic EnemyLaserEyeIdle 33 7 48 48 0 0 100 1 HITSCAN 60 0 1 
-Player 1 5 48 48 8 -10 15 2 5 
-Tile UnderGroundIdle 91 3 
-Tile UnderGroundIdle 91 4 
 Tile UnderGroundIdle 91 5 
 Tile UnderGroundIdle 91 6 
 Tile UnderGroundIdle 91 7 
@@ -311,3 +308,7 @@ Tile UnderGroundIdle 91 10
 Tile UnderGroundIdle 91 11 
 Tile UnderGroundIdle 91 12 
 Tile UnderGroundIdle 91 13 
+Player 1 5 48 48 8 -10 15 2 5 
+Decoration NonEnemyTreeNew 66 2 
+Tile UnderGroundIdle 91 4 
+Tile UnderGroundIdle 91 3 

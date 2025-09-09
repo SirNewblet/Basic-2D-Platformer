@@ -208,7 +208,7 @@ void Scene_Play::spawnBullet(Entity entity)
 	bullet.addComponent<CBoundingBox>(bullet.getComponent<CAnimation>().animation.getSize() * 0.90f);
 	bullet.addComponent<CDamage>(10);
 	bullet.addComponent<CState>("ALIVE");
-	bullet.addComponent<CLifespan>(180, m_currentFrame);
+	bullet.addComponent<CLifespan>(45, m_currentFrame);
 }
 
 void Scene_Play::update()
@@ -333,6 +333,11 @@ void Scene_Play::sEnemyLogic()
 		{
 			e.getComponent<CAttacking>().isInReach = (abs(m_player.getComponent<CTransform>().pos.x - e.getComponent<CTransform>().pos.x) < m_game->window().getView().getSize().x * 0.50f);
 			e.getComponent<CTransform>().scale.x = (m_player.getComponent<CTransform>().pos.x < e.getComponent<CTransform>().pos.x) ? 1 : -1;
+
+			if (e.getComponent<CAttacking>().isInReach && e.getComponent<CAttacking>().attackType == "HITSCAN")
+			{
+				e.getComponent<CRayCaster>().target = m_player.getComponent<CTransform>().pos;
+			}
 			if (e.getComponent<CAttacking>().isInReach && e.getComponent<CAttacking>().canAttack)
 			{
 				e.getComponent<CAttacking>().canAttack = false;
@@ -341,7 +346,6 @@ void Scene_Play::sEnemyLogic()
 				if (e.getComponent<CAttacking>().attackType == "HITSCAN")
 				{
 					// Specify hitscan states here
-					e.getComponent<CRayCaster>().target = m_player.getComponent<CTransform>().pos;
 				}
 				else if (e.getComponent<CAttacking>().attackType == "PROJECTILE")
 				{
@@ -816,7 +820,7 @@ void Scene_Play::sRayCast()
 {
 	for (auto e : m_entityManager.getEntities())
 	{
-		if (e.hasComponent<CRayCaster>())
+		if (e.hasComponent<CRayCaster>() && e.getComponent<CAttacking>().isInReach)
 		{
 			for (auto t : e.getComponent<CRayCaster>().targets)
 			{
