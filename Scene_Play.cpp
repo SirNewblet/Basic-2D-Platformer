@@ -309,6 +309,7 @@ void Scene_Play::sCamera()
 	// Set the viewport of the window to be centered on the player if it's far enough right
 	auto& pPos = m_player.getComponent<CTransform>().pos;
 	float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, pPos.x);
+	float windowMaxY = m_game->window().getSize().y / 2.0f;
 	sf::View view = m_game->window().getView();
 	float windowCenterY = view.getCenter().y;
 
@@ -319,6 +320,11 @@ void Scene_Play::sCamera()
 	else if (pPos.y > view.getCenter().y)
 	{
 		windowCenterY += camYVelocity;
+	}
+
+	if (pPos.y > windowMaxY && windowCenterY > windowMaxY)
+	{
+		windowCenterY = windowMaxY;
 	}
 
 	view.setCenter({ windowCenterX, windowCenterY });
